@@ -1,0 +1,35 @@
+{
+  "name": "relement",
+  "version": "0.1.0",
+  "description": "A lightweight JavaScript UI framework built on native Custom Elements.",
+  "license": "ISC",
+  "author": "",
+  "private": true,
+  "type": "module",
+  "homepage": "https://github.com/EVGlukhov/Relement#readme",
+  "bugs": {
+    "url": "https://github.com/EVGlukhov/Relement/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EVGlukhov/Relement.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "dist/src"
+  ],
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
