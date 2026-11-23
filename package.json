@@ -16,7 +16,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js"
   },
   "files": [
     "dist/src"
@@ -30,6 +31,8 @@
     }
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
+    "happy-dom": "^21.0.4",
     "typescript": "^7.0.2"
   }
 }
