@@ -5,7 +5,10 @@ defineElement("x-counter", ({ useState }) => {
   const button = document.createElement("button");
 
   button.textContent = `Count: ${count}`;
-  button.addEventListener("click", () => setCount(count + 1));
+  button.addEventListener("click", () => {
+    setCount((current) => current + 1);
+    setCount((current) => current + 1);
+  });
 
   return button;
 });
