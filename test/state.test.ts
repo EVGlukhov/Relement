@@ -37,3 +37,23 @@ test("keeps state separate between element instances", () => {
   assert.equal(first.textContent, "1");
   assert.equal(second.textContent, "0");
 });
+
+test("throws when the hook count changes between renders", () => {
+  let revealExtraState = (): void => {};
+
+  defineElement("x-hook-count-test", ({ useState }) => {
+    const [revealed, setRevealed] = useState(false);
+    revealExtraState = () => setRevealed(true);
+
+    if (revealed) {
+      useState(0);
+    }
+
+    return document.createElement("span");
+  });
+
+  const element = document.createElement("x-hook-count-test");
+  document.body.replaceChildren(element);
+
+  assert.throws(revealExtraState, /number of useState calls changed/);
+});
