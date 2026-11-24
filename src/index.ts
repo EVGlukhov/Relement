@@ -1,5 +1,6 @@
 import { HookRuntime } from "./hooks/runtime.js";
 import type { Render } from "./hooks/types.js";
+import type { ComponentProps, ComponentRender } from "./types.js";
 
 export { useEffect, useState, useRef } from "./hooks/index.js";
 export type {
@@ -8,12 +9,20 @@ export type {
   Effect,
   EffectCleanup,
   Hooks,
-  Render,
   StateSetter,
   StateUpdate,
 } from "./hooks/index.js";
 
-export function defineElement(name: string, render: Render): void {
+export { h } from "./jsx.js";
+export { createRoot, type Root } from "./root.js";
+
+export function defineElement<TProps extends ComponentProps>(
+  name: string,
+  render: ComponentRender<TProps>,
+  observedAttributes: readonly (keyof TProps & string)[] = [],
+): void {
+  const attributes = [...observedAttributes];
+
   class RelementElement extends HTMLElement {
     #hooks: HookRuntime;
 
@@ -25,6 +34,24 @@ export function defineElement(name: string, render: Render): void {
       );
     }
 
+    static get observedAttributes(): string[] {
+      return attributes;
+    }
+
+    attributeChangedCallback(): void {
+      this.update();
+    }
+
+    private readProps(): TProps {
+      const props: ComponentProps = {};
+
+      for (const attribute of attributes) {
+        props[attribute] = this.getAttribute(attribute);
+      }
+
+      return props as unknown as TProps;
+    }
+
     connectedCallback(): void {
       this.update();
     }
@@ -34,7 +61,8 @@ export function defineElement(name: string, render: Render): void {
     }
 
     private update(): void {
-      const view = this.#hooks.render(render);
+      const componentRender: Render = () => render(this.readProps());
+      const view = this.#hooks.render(componentRender);
       this.replaceChildren(view);
       this.#hooks.commitEffects();
     }

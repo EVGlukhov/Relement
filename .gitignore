@@ -4,5 +4,6 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 npm-debug.log*
-.history
-.lh
+.lh/
+.history/
+**/.history/

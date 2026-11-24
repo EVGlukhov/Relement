@@ -169,3 +169,26 @@ test("preserves a ref between renders without rerendering on mutation", () => {
   assert.equal(element.textContent, "1:5");
   assert.strictEqual(savedRef, firstRef);
 });
+
+test("throws when hook type changes at the same position", () => {
+  let changeHookType = (): void => {};
+
+  defineElement("x-hook-type-test", () => {
+    const [usesState, setUsesState] = useState(true);
+
+    changeHookType = () => setUsesState(false);
+
+    if (usesState) {
+      useState(0);
+    } else {
+      useRef(0);
+    }
+
+    return document.createElement("span");
+  });
+
+  const element = document.createElement("x-hook-type-test");
+  document.body.appendChild(element);
+
+  assert.throws(changeHookType, /Hook type changed at this position/);
+});

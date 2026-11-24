@@ -2,5 +2,15 @@
   "cSpell.words": ["Relement"],
   "editor.detectIndentation": false,
   "editor.insertSpaces": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "files.exclude": {
+    "**/.history": true
+  },
+  "search.exclude": {
+    "**/.history": true
+  },
+  "files.watcherExclude": {
+    "**/.history/**": true
+  },
+  "typescript.preferences.autoImportFileExcludePatterns": ["**/.history/**"]
 }

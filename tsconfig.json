@@ -6,7 +6,15 @@
     "rootDir": ".",
     "outDir": "dist",
     "strict": true,
-    "lib": ["ES2022", "DOM"]
+    "lib": ["ES2022", "DOM"],
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
   },
-  "include": ["src/**/*.ts", "examples/**/*.ts", "test/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "examples/**/*.ts",
+    "examples/**/*.tsx",
+    "test/**/*.ts"
+  ]
 }

@@ -8,7 +8,6 @@ export type {
   Effect,
   EffectCleanup,
   Hooks,
-  Render,
   StateSetter,
   StateUpdate,
 } from "./types.js";
