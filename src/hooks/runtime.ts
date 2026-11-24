@@ -4,10 +4,12 @@ import type {
   HookContext,
   HookSlot,
   Hooks,
+  RefSlot,
   Render,
   StateSlot,
 } from "./types.js";
 import { createUseEffect } from "./use-effect.js";
+import { createUseRef } from "./use-ref.js";
 import { createUseState } from "./use-state.js";
 
 export class HookRuntime implements HookContext {
@@ -27,6 +29,7 @@ export class HookRuntime implements HookContext {
     this.#hooks = {
       useState: createUseState(this),
       useEffect: createUseEffect(this),
+      useRef: createUseRef(this),
     };
   }
 
@@ -59,6 +62,27 @@ export class HookRuntime implements HookContext {
 
     if (existingSlot.kind !== "effect") {
       throw new Error("Hook type changed at this position.");
+    }
+
+    return existingSlot;
+  }
+
+  nextRefSlot(initialValue: unknown): RefSlot {
+    const index = this.#hookIndex++;
+    const existingSlot = this.#slots[index];
+
+    if (!existingSlot) {
+      const slot: RefSlot = {
+        kind: "ref",
+        value: { current: initialValue },
+      };
+
+      this.#slots[index] = slot;
+      return slot;
+    }
+
+    if (existingSlot.kind !== "ref") {
+      throw new Error("Hook type changed at this position");
     }
 
     return existingSlot;

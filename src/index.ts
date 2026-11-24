@@ -1,8 +1,10 @@
 import { HookRuntime } from "./hooks/runtime.js";
 import type { Render } from "./hooks/types.js";
 
-export { useEffect, useState } from "./hooks/index.js";
+export { useEffect, useState, useRef } from "./hooks/index.js";
 export type {
+  RefObject,
+  RefSlot,
   Effect,
   EffectCleanup,
   Hooks,

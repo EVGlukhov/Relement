@@ -10,7 +10,8 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { defineElement, useState, useEffect } = await import("../src/index.js");
+const { defineElement, useState, useEffect, useRef } =
+  await import("../src/index.js");
 
 test("keeps state separate between element instances", () => {
   defineElement("x-counter-test", () => {
@@ -134,4 +135,37 @@ test("runs effects after every render when dependencies are omitted", () => {
   increment();
 
   assert.deepEqual(events, ["effect:0", "cleanup:0", "effect:1"]);
+});
+
+test("preserves a ref between renders without rerendering on mutation", () => {
+  let savedRef: { current: number } | undefined;
+  let forceRender = (): void => {};
+
+  defineElement("x-ref-test", () => {
+    const ref = useRef(0);
+    savedRef = ref;
+
+    const [count, setCount] = useState(0);
+    forceRender = () => setCount((value) => value + 1);
+
+    const span = document.createElement("span");
+    span.textContent = `${count}:${ref.current}`;
+    return span;
+  });
+
+  const element = document.createElement("x-ref-test");
+  document.body.appendChild(element);
+
+  const firstRef = savedRef;
+  assert.ok(firstRef);
+  assert.equal(element.textContent, "0:0");
+
+  firstRef.current = 5;
+
+  assert.equal(element.textContent, "0:0");
+
+  forceRender();
+
+  assert.equal(element.textContent, "1:5");
+  assert.strictEqual(savedRef, firstRef);
 });
