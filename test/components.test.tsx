@@ -7,6 +7,8 @@ const dom = new Window();
 Object.assign(globalThis, {
   document: dom.document,
   HTMLElement: dom.HTMLElement,
+  Node: dom.Node,
+  customElements: dom.customElements,
 });
 
 const { createRoot, h, useState } = await import("../src/index.js");
@@ -30,8 +32,9 @@ test("gives each function component its own state", () => {
   }
 
   const host = document.createElement("div");
-  const root = createRoot(host);
+  document.body.appendChild(host);
 
+  const root = createRoot(host);
   root.render(<App />);
 
   const buttons = host.querySelectorAll("button");
@@ -42,6 +45,8 @@ test("gives each function component its own state", () => {
 
   buttons[0].click();
 
-  assert.equal(buttons[0].textContent, "1");
-  assert.equal(buttons[1].textContent, "0");
+  const updatedButtons = host.querySelectorAll("button");
+
+  assert.equal(updatedButtons[0].textContent, "1");
+  assert.equal(updatedButtons[1].textContent, "0");
 });

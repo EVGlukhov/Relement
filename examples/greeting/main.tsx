@@ -1,14 +1,32 @@
-import { createRoot, defineElement, h } from "../../src/index.js";
+import { createRoot, defineElement, h, useState } from "../../src/index.js";
 
 type GreetingProps = {
   name: string | null;
 };
 
-defineElement<GreetingProps>(
-  "x-greeting",
-  (props) => <p>Hello, {props.name ?? "Guest"}</p>,
-  ["name"],
-);
+function Greeting({ name }: GreetingProps) {
+  return <p>Hello, {name}</p>;
+}
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <button onClick={() => setCount((value) => value + 1)}>
+      Count: {count}
+    </button>
+  );
+}
+
+function App() {
+  return (
+    <main>
+      <h1>Relement greeting example</h1>
+      <Greeting name="Evgeny" />
+      <Counter />
+    </main>
+  );
+}
 
 const host = document.querySelector("#root");
 
@@ -16,9 +34,4 @@ if (!(host instanceof HTMLElement)) {
   throw new Error('Root element "#root" was not found.');
 }
 
-createRoot(host).render(
-  <main>
-    <h1>Relement greeting example</h1>
-    <x-greeting name="Evgeny" />
-  </main>,
-);
+createRoot(host).render(<App />);

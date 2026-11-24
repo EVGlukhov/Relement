@@ -1,27 +1,25 @@
+import type { VNode, VNodeChild, VNodeType } from "./vdom.js";
+
 export function h(
-  tagName: string,
+  tagName: VNodeType,
   props: Record<string, unknown> | null,
-  ...children: Array<Node | string>
-): HTMLElement {
-  const element = document.createElement(tagName);
-
-  for (const [name, value] of Object.entries(props ?? {})) {
-    if (value !== false && value !== null && value !== undefined) {
-      element.setAttribute(name, String(value));
-    }
-  }
-
-  for (const child of children) {
-    element.append(
-      typeof child === "string" ? document.createTextNode(child) : child,
-    );
-  }
-
-  return element;
+  ...children: VNodeChild[]
+): VNode {
+  return {
+    type: tagName,
+    props: props ?? {},
+    children,
+  };
 }
 
 declare global {
   namespace JSX {
+    interface Element extends VNode {}
+
+    interface ElementChildrenAttribute {
+      children: {};
+    }
+
     interface IntrinsicElements {
       [tagName: string]: Record<string, unknown>;
     }

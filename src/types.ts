@@ -1,8 +1,6 @@
+import { VNodeChild } from "./vdom.js";
+
 export type ComponentProps = Record<string, string | null>;
-export type ComponentRender<TProps extends ComponentProps = ComponentProps> = (
+export type ComponentRender<TProps extends object = ComponentProps> = (
   props: TProps,
-) => Node;
-export type ComponentFactory = (
-  props: Record<string, unknown>,
-  children: Node[],
-) => Node;
+) => VNodeChild;

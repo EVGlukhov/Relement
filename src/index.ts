@@ -1,5 +1,5 @@
 import { HookRuntime } from "./hooks/runtime.js";
-import type { Render } from "./hooks/types.js";
+import { renderChild } from "./renderer.js";
 import type { ComponentProps, ComponentRender } from "./types.js";
 
 export { useEffect, useState, useRef } from "./hooks/index.js";
@@ -16,7 +16,7 @@ export type {
 export { h } from "./jsx.js";
 export { createRoot, type Root } from "./root.js";
 
-export function defineElement<TProps extends ComponentProps>(
+export function defineElement<TProps extends object>(
   name: string,
   render: ComponentRender<TProps>,
   observedAttributes: readonly (keyof TProps & string)[] = [],
@@ -61,9 +61,8 @@ export function defineElement<TProps extends ComponentProps>(
     }
 
     private update(): void {
-      const componentRender: Render = () => render(this.readProps());
-      const view = this.#hooks.render(componentRender);
-      this.replaceChildren(view);
+      const view = this.#hooks.render(() => render(this.readProps()));
+      this.replaceChildren(...renderChild(view));
       this.#hooks.commitEffects();
     }
   }

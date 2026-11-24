@@ -8,6 +8,7 @@ Object.assign(globalThis, {
   document: dom.document,
   HTMLElement: dom.HTMLElement,
   customElements: dom.customElements,
+  Node: dom.Node,
 });
 
 const { defineElement, useState, useEffect, useRef } =
