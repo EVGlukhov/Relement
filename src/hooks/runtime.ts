@@ -5,7 +5,6 @@ import type {
   HookSlot,
   Hooks,
   RefSlot,
-  Render,
   StateSlot,
 } from "./types.js";
 import { createUseEffect } from "./use-effect.js";
@@ -100,7 +99,7 @@ export class HookRuntime implements HookContext {
     this.#pendingEffects.add(slot);
   }
 
-  render(render: Render): Node {
+  render<T>(render: () => T): T {
     this.#hookIndex = 0;
 
     const view = withActiveHooks(this.#hooks, render);
