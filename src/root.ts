@@ -1,4 +1,4 @@
-import { renderChild } from "./renderer.js";
+import { reconcileChildren } from "./renderer.js";
 import type { VNodeChild } from "./vdom.js";
 
 export type Root = {
@@ -8,7 +8,7 @@ export type Root = {
 export function createRoot(host: HTMLElement): Root {
   return {
     render(node: VNodeChild): void {
-      host.replaceChildren(...renderChild(node));
+      reconcileChildren(host, [node]);
     },
   };
 }

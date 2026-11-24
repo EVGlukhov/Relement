@@ -1,5 +1,5 @@
 import { HookRuntime } from "./hooks/runtime.js";
-import { renderChild } from "./renderer.js";
+import { reconcileChildren } from "./renderer.js";
 import type { ComponentProps, ComponentRender } from "./types.js";
 
 export { useEffect, useState, useRef } from "./hooks/index.js";
@@ -62,7 +62,7 @@ export function defineElement<TProps extends object>(
 
     private update(): void {
       const view = this.#hooks.render(() => render(this.readProps()));
-      this.replaceChildren(...renderChild(view));
+      reconcileChildren(this, [view]);
       this.#hooks.commitEffects();
     }
   }
