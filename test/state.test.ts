@@ -57,3 +57,43 @@ test("throws when the hook count changes between renders", () => {
 
   assert.throws(revealExtraState, /number of useState calls changed/);
 });
+
+test("runs effects when dependencies change and cleans up on disconnect", () => {
+  const events: string[] = [];
+  let setCount: (value: number) => void = () => {};
+  let setUnrelated: (value: number) => void = () => {};
+
+  defineElement("x-effect-test", ({ useState, useEffect }) => {
+    const [count, updateCount] = useState(0);
+    setCount = updateCount;
+
+    const [unrelated, updateUnrelated] = useState(0);
+    setUnrelated = updateUnrelated;
+
+    useEffect(() => {
+      events.push(`effect:${count}`);
+
+      return () => {
+        events.push(`cleanup:${count}`);
+      };
+    }, [count]);
+
+    const span = document.createElement("span");
+    span.textContent = String(unrelated);
+    return span;
+  });
+
+  const element = document.createElement("x-effect-test");
+  document.body.replaceChildren(element);
+
+  assert.deepEqual(events, ["effect:0"]);
+
+  setUnrelated(1);
+  assert.deepEqual(events, ["effect:0"]);
+
+  setCount(1);
+  assert.deepEqual(events, ["effect:0", "cleanup:0", "effect:1"]);
+
+  document.body.removeChild(element);
+  assert.deepEqual(events, ["effect:0", "cleanup:0", "effect:1", "cleanup:1"]);
+});

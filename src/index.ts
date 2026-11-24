@@ -18,8 +18,14 @@ export function defineElement(name: string, render: Render): void {
       this.update();
     }
 
+    disconnectedCallback(): void {
+      this.#hooks.disconnect();
+    }
+
     private update(): void {
-      this.replaceChildren(this.#hooks.render(render));
+      const view = this.#hooks.render(render);
+      this.replaceChildren(view);
+      this.#hooks.commitEffects();
     }
   }
 
