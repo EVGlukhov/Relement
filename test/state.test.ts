@@ -10,10 +10,10 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { defineElement } = await import("../src/index.js");
+const { defineElement, useState, useEffect } = await import("../src/index.js");
 
 test("keeps state separate between element instances", () => {
-  defineElement("x-counter-test", ({ useState }) => {
+  defineElement("x-counter-test", () => {
     const [count, setCount] = useState(0);
     const button = document.createElement("button");
 
@@ -41,7 +41,7 @@ test("keeps state separate between element instances", () => {
 test("throws when the hook count changes between renders", () => {
   let revealExtraState = (): void => {};
 
-  defineElement("x-hook-count-test", ({ useState }) => {
+  defineElement("x-hook-count-test", () => {
     const [revealed, setRevealed] = useState(false);
     revealExtraState = () => setRevealed(true);
 
@@ -55,7 +55,7 @@ test("throws when the hook count changes between renders", () => {
   const element = document.createElement("x-hook-count-test");
   document.body.replaceChildren(element);
 
-  assert.throws(revealExtraState, /number of useState calls changed/);
+  assert.throws(revealExtraState, /number of hooks changed/);
 });
 
 test("runs effects when dependencies change and cleans up on disconnect", () => {
@@ -63,7 +63,7 @@ test("runs effects when dependencies change and cleans up on disconnect", () => 
   let setCount: (value: number) => void = () => {};
   let setUnrelated: (value: number) => void = () => {};
 
-  defineElement("x-effect-test", ({ useState, useEffect }) => {
+  defineElement("x-effect-test", () => {
     const [count, updateCount] = useState(0);
     setCount = updateCount;
 
@@ -96,4 +96,42 @@ test("runs effects when dependencies change and cleans up on disconnect", () => 
 
   document.body.removeChild(element);
   assert.deepEqual(events, ["effect:0", "cleanup:0", "effect:1", "cleanup:1"]);
+
+  document.body.appendChild(element);
+  assert.deepEqual(events, [
+    "effect:0",
+    "cleanup:0",
+    "effect:1",
+    "cleanup:1",
+    "effect:1",
+  ]);
+});
+
+test("runs effects after every render when dependencies are omitted", () => {
+  const events: string[] = [];
+  let increment = (): void => {};
+
+  defineElement("x-effect-every-render-test", () => {
+    const [count, setCount] = useState(0);
+    increment = () => setCount((value) => value + 1);
+
+    useEffect(() => {
+      events.push(`effect:${count}`);
+
+      return () => {
+        events.push(`cleanup:${count}`);
+      };
+    });
+
+    return document.createElement("span");
+  });
+
+  const element = document.createElement("x-effect-every-render-test");
+  document.body.appendChild(element);
+
+  assert.deepEqual(events, ["effect:0"]);
+
+  increment();
+
+  assert.deepEqual(events, ["effect:0", "cleanup:0", "effect:1"]);
 });

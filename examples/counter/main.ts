@@ -1,6 +1,6 @@
-import { defineElement } from "../../src/index.js";
+import { defineElement, useState } from "../../src/index.js";
 
-defineElement("x-counter", ({ useState }) => {
+defineElement("x-counter", () => {
   const [count, setCount] = useState(0);
   const button = document.createElement("button");
 

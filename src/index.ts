@@ -1,6 +1,15 @@
-import { HookRuntime, type Render } from "./hooks.js";
+import { HookRuntime } from "./hooks/runtime.js";
+import type { Render } from "./hooks/types.js";
 
-export type { Hooks, Render, StateSetter, StateUpdate } from "./hooks.js";
+export { useEffect, useState } from "./hooks/index.js";
+export type {
+  Effect,
+  EffectCleanup,
+  Hooks,
+  Render,
+  StateSetter,
+  StateUpdate,
+} from "./hooks/index.js";
 
 export function defineElement(name: string, render: Render): void {
   class RelementElement extends HTMLElement {
