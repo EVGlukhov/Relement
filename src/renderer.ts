@@ -214,7 +214,7 @@ function reconcileChild(
 }
 
 export function reconcileChildren(
-  parent: HTMLElement,
+  parent: HTMLElement | ShadowRoot,
   children: readonly VNodeChild[],
 ): void {
   const nextChildren = flattenChildren(children);
@@ -289,10 +289,17 @@ function ensureComponentHost(component: FunctionComponent): string {
   class RelementFunctionComponent extends HTMLElement {
     #component: FunctionComponent | undefined;
     #props: Record<string, unknown> = {};
-    #hooks = new HookRuntime(
-      () => this.update(),
-      () => this.isConnected,
-    );
+    #shadowRoot: ShadowRoot;
+    #hooks: HookRuntime;
+
+    constructor() {
+      super();
+      this.#shadowRoot = this.attachShadow({ mode: "open" });
+      this.#hooks = new HookRuntime(
+        () => this.update(),
+        () => this.isConnected,
+      );
+    }
 
     connectedCallback(): void {
       this.update();
@@ -326,7 +333,7 @@ function ensureComponentHost(component: FunctionComponent): string {
       }
 
       const view = this.#hooks.render(() => component(this.#props as never));
-      reconcileChildren(this, [view]);
+      reconcileChildren(this.#shadowRoot, [view]);
       this.#hooks.commitEffects();
     }
   }
