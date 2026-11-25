@@ -19,7 +19,7 @@
   color: var(--ink);
   font-size: clamp(2.45rem, 5.2vw, 4.25rem);
   font-weight: 770;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.035em;
   line-height: 1.07;
 }
 
