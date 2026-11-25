@@ -269,3 +269,20 @@ test("injects registered module styles into the component shadow root", () => {
     "Styled",
   );
 });
+
+test("type-checks props passed to function components with h", () => {
+  function Label({ text }: { text: string }) {
+    return <span>{text}</span>;
+  }
+
+  h(Label, { text: "Hello" });
+
+  // @ts-expect-error text must be a string
+  h(Label, { text: 123 });
+
+  // @ts-expect-error text is required
+  h(Label, {});
+
+  // @ts-expect-error required text cannot be omitted
+  h(Label, null);
+});

@@ -1,0 +1,11 @@
+.app {
+  display: grid;
+  gap: 1rem;
+  max-width: 32rem;
+  margin: 3rem auto;
+  font-family: sans-serif;
+}
+
+.title {
+  color: #263b80;
+}

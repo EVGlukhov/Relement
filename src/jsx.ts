@@ -4,6 +4,22 @@ type VNodeProps = Record<string, unknown> & {
   key?: VNodeKey;
 };
 
+type ComponentPropsArgument<P extends object> = {} extends P
+  ? (P & VNodeProps) | null
+  : P & VNodeProps;
+
+export function h<P extends object>(
+  tagName: (props: P) => VNodeChild,
+  props: ComponentPropsArgument<P>,
+  ...children: VNodeChild[]
+): VNode;
+
+export function h(
+  tagName: string,
+  props: VNodeProps | null,
+  ...children: VNodeChild[]
+): VNode;
+
 export function h(
   tagName: VNodeType,
   props: VNodeProps | null,
