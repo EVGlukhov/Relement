@@ -1,5 +1,6 @@
 import { HookRuntime } from "./hooks/runtime.js";
 import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
+import { Fragment } from "./vdom.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -48,6 +49,15 @@ interface FunctionComponentHost extends HTMLElement {
   ): void;
 }
 
+function isFragment(child: VNodeChild): child is VNode {
+  return (
+    typeof child === "object" &&
+    child !== null &&
+    !(child instanceof Node) &&
+    (child as VNode).type === Fragment
+  );
+}
+
 function isFunctionComponentHost(
   node: Node | undefined,
 ): node is FunctionComponentHost {
@@ -60,6 +70,8 @@ function flattenChildren(children: readonly VNodeChild[]): VNodeChild[] {
   for (const child of children) {
     if (Array.isArray(child)) {
       result.push(...flattenChildren(child));
+    } else if (isFragment(child)) {
+      result.push(...flattenChildren(child.children));
     } else if (
       child !== null &&
       child !== undefined &&
@@ -122,6 +134,10 @@ function reconcileChild(
 
   const vnode = child as VNode;
   const props = getComponentProps(vnode);
+
+  if (vnode.type === Fragment) {
+    throw new Error("Fragment nodes must be flattened before reconciliation.");
+  }
 
   if (typeof vnode.type !== "string") {
     const tag = ensureComponentHost(vnode.type);

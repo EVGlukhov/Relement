@@ -1,3 +1,7 @@
+export function Fragment({ children }: { children?: VNodeChild }): VNodeChild {
+  return children ?? null;
+}
+
 export type VNodeChild =
   | VNode
   | Node

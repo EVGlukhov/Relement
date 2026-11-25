@@ -11,7 +11,7 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { createRoot, h, useState } = await import("../src/index.js");
+const { createRoot, h, useState, Fragment } = await import("../src/index.js");
 
 test("gives each function component its own state", () => {
   function Counter() {
@@ -145,4 +145,26 @@ test("passes props and children to function components", () => {
 
   assert.equal(host.querySelector("h1")?.textContent, "Welcome");
   assert.equal(host.querySelector("p")?.textContent, "Panel content");
+});
+
+test("renders fragments without adding a wrapper", () => {
+  function App() {
+    return (
+      <>
+        <span>First</span>
+        <span>Second</span>
+      </>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<App />);
+
+  const appHost = host.querySelector("r-app");
+  assert.ok(appHost);
+  assert.deepEqual(
+    Array.from(appHost.children, (element) => element.tagName),
+    ["SPAN", "SPAN"],
+  );
 });
