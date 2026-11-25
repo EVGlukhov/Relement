@@ -1,32 +1,14 @@
 import { resolve } from "node:path";
+import { watch } from "node:fs";
 import { performance } from "node:perf_hooks";
-import { styleText } from "node:util";
 import { loadConfig } from "./load-config.mjs";
 import { runBuild } from "./run-build.mjs";
-import { watch } from "node:fs";
+import { createHttpServer } from "./http-server.mjs";
+import { logBanner, logError, logInfo, logSuccess } from "./logger.mjs";
 
 const projectRoot = process.cwd();
 const config = await loadConfig(resolve(projectRoot, "relement.config.ts"));
 const watchRoot = resolve(projectRoot, config.root);
-
-function timestamp() {
-  return styleText("dim", new Date().toLocaleTimeString());
-}
-
-/** @param {string} message */
-function logInfo(message) {
-  console.log(`${timestamp()} ${styleText("cyan", "●")} ${message}`);
-}
-
-/** @param {string} message */
-function logSuccess(message) {
-  console.log(`${timestamp()} ${styleText("green", "✓")} ${message}`);
-}
-
-/** @param {string} message */
-function logError(message) {
-  console.error(`${timestamp()} ${styleText("red", "✗")} ${message}`);
-}
 
 let building = false;
 let buildQueued = false;
@@ -53,8 +35,7 @@ async function rebuild() {
           `Build complete in ${Math.round(performance.now() - startedAt)} ms`,
         );
       } catch (error) {
-        logError("Build failed");
-        console.error(error);
+        logError("Build failed", error);
       }
     } while (buildQueued);
   } finally {
@@ -82,13 +63,25 @@ const watcher = watch(watchRoot, { recursive: true }, (_event, filename) => {
 });
 
 watcher.on("error", (error) => {
-  logError("File watcher failed");
-  console.error(error);
+  logError("File watcher failed", error);
   watcher.close();
   process.exitCode = 1;
 });
 
-console.log(`\n${styleText("bold", "Relement")} ${styleText("dim", "dev")}`);
+logBanner();
 logInfo(`Starting build in ${watchRoot}`);
+
+const server = createHttpServer(projectRoot, config);
+
+server.on("error", (error) => {
+  logError("HTTP server failed", error);
+  watcher.close();
+  process.exitCode = 1;
+});
+
 await rebuild();
-logInfo(`Watching ${watchRoot}`);
+
+server.listen(config.port, "127.0.0.1", () => {
+  logSuccess(`Ready at http://127.0.0.1:${config.port}`);
+  logInfo(`Watching ${watchRoot}`);
+});
