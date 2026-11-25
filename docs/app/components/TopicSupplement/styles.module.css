@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.callout {
+  display: grid;
+  gap: 0.2rem;
+  max-width: 760px;
+  margin-top: 1.7rem;
+  border: 1px solid #f1dfbf;
+  border-left: 3px solid #df9b47;
+  border-radius: 0.4rem;
+  background: #fff9ef;
+  color: #67553a;
+  padding: 0.85rem 1rem;
+  font-size: 0.83rem;
+}
+
+.callout strong {
+  color: #604723;
+}
+
+.sourceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  color: var(--accent-dark);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sourceLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sourceLink:focus-visible {
+  outline: 3px solid rgb(8 124 104 / 35%);
+  outline-offset: 2px;
+}

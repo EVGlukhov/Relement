@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.45rem;
+}
+
+.heroMeta span {
+  border: 1px solid #e0e9e2;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 62%);
+  color: #53665b;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+}

@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.sidebar {
+  position: sticky;
+  top: 4.25rem;
+  display: flex;
+  height: calc(100vh - 4.25rem);
+  flex-direction: column;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  padding: 1.7rem 1.15rem 1.25rem 1.5rem;
+}
+
+.sidebar nav {
+  flex: 1;
+}
+
+.noResults {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 680px) {
+  .sidebar {
+    position: fixed;
+    z-index: 4;
+    top: 3.8rem;
+    bottom: 0;
+    left: 0;
+    width: min(86vw, 310px);
+    height: auto;
+    transform: translateX(-105%);
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: 12px 0 30px rgb(23 38 32 / 10%);
+    transition: transform 180ms ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+}

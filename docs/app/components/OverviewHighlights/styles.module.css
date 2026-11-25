@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.highlights {
+  margin-top: 3.2rem;
+}
+
+.highlightsHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 730;
+}
+
+.highlightsHeading span:last-child {
+  color: #87948b;
+  font-size: 0.69rem;
+  font-weight: 550;
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.highlightCard {
+  min-height: 9.5rem;
+  border: 1px solid #e4e9e4;
+  border-radius: 0.8rem;
+  background: rgb(255 255 255 / 76%);
+  padding: 1rem;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.highlightCard:hover {
+  transform: translateY(-2px);
+  border-color: #c9ded2;
+  box-shadow: 0 8px 20px rgb(30 66 47 / 6%);
+}
+
+.highlightTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.highlightIcon {
+  display: grid;
+  width: 1.85rem;
+  height: 1.85rem;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.highlightNumber {
+  color: #a4afa8;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.overviewGrid h2 {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 0.9rem;
+  letter-spacing: -0.02em;
+}
+
+.overviewGrid p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .overviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .highlightCard {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .highlights {
+    margin-top: 2.5rem;
+  }
+}

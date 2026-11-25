@@ -1,0 +1,55 @@
+name: Deploy documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "scripts/build-css-modules.mjs"
+      - "scripts/build-docs.mjs"
+      - "tsconfig.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test framework
+        run: npm test
+      - name: Build documentation site
+        run: npm run build:docs
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload documentation
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/site
+      - name: Deploy documentation
+        id: deployment
+        uses: actions/deploy-pages@v4

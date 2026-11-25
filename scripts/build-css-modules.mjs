@@ -5,13 +5,14 @@ import {
   writeFile,
   mkdtempDisposable,
 } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import postcss from "postcss";
 import postcssModules from "postcss-modules";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const distRoot = join(projectRoot, "dist");
+const generatedCSSModules = new Set();
 
 /**
  * @param {string} directory
@@ -36,7 +37,7 @@ async function getFiles(directory) {
 
 const sourceFiles = [];
 
-for (const directory of ["src", "examples", "test"]) {
+for (const directory of ["src", "examples", "test", "docs/app"]) {
   sourceFiles.push(...(await getFiles(join(projectRoot, directory))));
 }
 
@@ -75,6 +76,7 @@ for (const sourcePath of sourceFiles.filter((path) =>
       `export default registerCSSModule(${JSON.stringify(classes)}, ` +
       `${JSON.stringify(result.css)});\n`,
   );
+  generatedCSSModules.add(outputPath);
 }
 
 /**
@@ -91,7 +93,15 @@ async function rewriteImports(directory) {
       await rewriteImports(path);
     } else if (entry.isFile() && path.endsWith(".js")) {
       const source = await readFile(path, "utf8");
-      const updated = source.replace(/(\.module\.css)(?=["'])/g, "$1.js");
+      const updated = source.replace(
+        /(\bfrom\s+|\bimport\s*)(["'])([^"']+\.module\.css)(["'])/g,
+        (match, keyword, openingQuote, modulePath, closingQuote) =>
+          generatedCSSModules.has(
+            resolve(dirname(path), `${modulePath}.js`),
+          )
+            ? `${keyword}${openingQuote}${modulePath}.js${closingQuote}`
+            : match,
+      );
 
       if (updated !== source) {
         await writeFile(path, updated);

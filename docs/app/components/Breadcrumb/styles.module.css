@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.3rem;
+  color: #75837b;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.breadcrumbDot {
+  width: 0.4rem;
+  height: 0.4rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22a17f;
+  box-shadow: 0 0 0 3px rgb(34 161 127 / 12%);
+}
+
+.breadcrumbDivider {
+  color: #bbc5bd;
+}

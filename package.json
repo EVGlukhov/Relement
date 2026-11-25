@@ -1,5 +1,5 @@
 {
-  "name": "relement",
+  "name": "@jgluhov/relement",
   "version": "0.1.0",
   "description": "A lightweight JavaScript UI framework built on native Custom Elements.",
   "license": "ISC",
@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc && node scripts/build-css-modules.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/test/*.test.js"
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "build:docs": "npm run build && node scripts/build-docs.mjs"
   },
   "files": [
     "dist/src"

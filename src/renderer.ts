@@ -91,6 +91,38 @@ function updateInlineStyles(
   }
 }
 
+function updateDOMProperty(
+  element: HTMLElement,
+  name: string,
+  value: unknown,
+): boolean {
+  let propertyValue: unknown;
+
+  if (name === "value" && "value" in element) {
+    propertyValue = value === null || value === undefined ? "" : String(value);
+  } else if (
+    [
+      "checked",
+      "selected",
+      "disabled",
+      "multiple",
+      "readOnly",
+      "required",
+    ].includes(name) &&
+    name in element
+  ) {
+    propertyValue = Boolean(value);
+  } else {
+    return false;
+  }
+
+  if (!Reflect.set(element, name, propertyValue)) {
+    throw new TypeError(`Cannot set DOM property "${name}".`);
+  }
+
+  return true;
+}
+
 function flattenChildren(children: readonly VNodeChild[]): VNodeChild[] {
   const result: VNodeChild[] = [];
 
@@ -170,6 +202,8 @@ function updateElementProps(
       updateInlineStyles(element, oldValue, value);
       continue;
     }
+
+    if (updateDOMProperty(element, name, value)) continue;
 
     if (name.startsWith("on") && isEventHandler(oldValue)) {
       element.removeEventListener(name.slice(2).toLowerCase(), oldValue);

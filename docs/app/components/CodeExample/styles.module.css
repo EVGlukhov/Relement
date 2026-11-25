@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.example {
+  overflow: hidden;
+  margin: 2rem 0;
+  border: 1px solid #263d33;
+  border-radius: 0.85rem;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgb(49 103 77 / 22%), transparent 28rem),
+    #15231d;
+  box-shadow: 0 12px 30px rgb(17 39 29 / 10%);
+}
+
+.exampleHeader {
+  display: flex;
+  min-height: 2.85rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #31453b;
+  color: #b7c9bf;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.72rem;
+}
+
+.codeFile {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.codeFileIcon {
+  display: grid;
+  width: 1.3rem;
+  height: 1.3rem;
+  place-items: center;
+  border-radius: 0.32rem;
+  background: #294438;
+  color: #a6dbc0;
+  font-family: monospace;
+  font-size: 0.58rem;
+  font-weight: 750;
+}
+
+.exampleHeader button {
+  border: 1px solid #496157;
+  border-radius: 0.4rem;
+  background: #20352c;
+  color: #e1eee7;
+  cursor: pointer;
+  padding: 0.28rem 0.58rem;
+  font: inherit;
+  font-size: 0.69rem;
+  transition: background 120ms ease;
+}
+
+.exampleHeader button:hover {
+  background: #2b493d;
+}
+
+.example pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 1.2rem 1.3rem 1.45rem;
+  color: #e1eee7;
+  tab-size: 2;
+}
+
+.example code {
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.8;
+  white-space: pre;
+}
+
+.exampleHeader button:focus-visible {
+  outline: 3px solid rgb(8 124 104 / 45%);
+  outline-offset: 2px;
+}

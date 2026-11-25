@@ -1,0 +1,123 @@
+:host {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.topbar {
+  display: flex;
+  height: 4.25rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(222 230 223 / 82%);
+  background: rgb(255 255 255 / 88%);
+  padding: 0 clamp(1.25rem, 5vw, 4.5rem);
+  backdrop-filter: blur(18px);
+}
+
+.brand,
+.topbarLinks {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 0.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.08rem;
+  font-weight: 780;
+  letter-spacing: -0.045em;
+}
+
+.brandMark {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0.65rem;
+  background: linear-gradient(145deg, #12957c, #086452);
+  box-shadow: 0 3px 8px rgb(8 124 104 / 20%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.topbarLinks {
+  gap: 1.25rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.topbarLinks a {
+  color: var(--accent-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.topbarLinks a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.version {
+  border-right: 1px solid var(--line);
+  padding-right: 1.25rem;
+}
+
+.menuToggle {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: white;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0.4rem 0.65rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.menuIcon {
+  color: var(--accent-dark);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.brand:focus-visible,
+.topbarLinks a:focus-visible,
+.menuToggle:focus-visible {
+  outline: 3px solid rgb(8 124 104 / 35%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 680px) {
+  :host {
+    position: sticky;
+  }
+
+  .topbar {
+    height: 3.8rem;
+  }
+
+  .version {
+    display: none;
+  }
+
+  .menuToggle {
+    display: inline-flex;
+  }
+}

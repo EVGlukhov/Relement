@@ -286,3 +286,60 @@ test("type-checks props passed to function components with h", () => {
   // @ts-expect-error required text cannot be omitted
   h(Label, null);
 });
+
+test("type-checks function component props in JSX", () => {
+  function Label({ text }: { text: string }) {
+    return <span>{text}</span>;
+  }
+
+  function Panel({ children }: { children: string }) {
+    return <div>{children}</div>;
+  }
+
+  const label = <Label text="Hello" />;
+  const keyedLabel = <Label key="label" text="Hello" />;
+  const panel = <Panel>Content</Panel>;
+
+  // @ts-expect-error text must be a string
+  const invalidText = <Label text={123} />;
+
+  // @ts-expect-error text is required
+  const missingText = <Label />;
+
+  // @ts-expect-error children must be a string
+  const invalidChildren = <Panel>{123}</Panel>;
+
+  // @ts-expect-error children are required
+  const missingChildren = <Panel />;
+
+  void [
+    label,
+    keyedLabel,
+    panel,
+    invalidText,
+    missingText,
+    invalidChildren,
+    missingChildren,
+  ];
+});
+
+test("updates input value and checked DOM properties", () => {
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+
+  const root = createRoot(host);
+  root.render(<input value="first" checked={false} />);
+
+  const input = host.querySelector<HTMLInputElement>("input");
+  assert.ok(input);
+  assert.equal(input.value, "first");
+  assert.equal(input.checked, false);
+
+  root.render(<input value="second" checked={true} />);
+  assert.equal(input.value, "second");
+  assert.equal(input.checked, true);
+
+  root.render(<input />);
+  assert.equal(input.value, "");
+  assert.equal(input.checked, false);
+});

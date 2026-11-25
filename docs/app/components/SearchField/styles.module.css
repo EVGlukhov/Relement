@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.searchField {
+  display: block;
+}
+
+.searchLabel {
+  display: block;
+  margin: 0 0 0.4rem 0.5rem;
+  color: #78877e;
+  font-size: 0.66rem;
+  font-weight: 760;
+  letter-spacing: 0.105em;
+  text-transform: uppercase;
+}
+
+.searchInput {
+  width: 100%;
+  border: 1px solid #e0e6e1;
+  border-radius: 0.6rem;
+  outline: 0;
+  background: rgb(255 255 255 / 85%);
+  color: var(--ink);
+  padding: 0.58rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.searchInput:focus {
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgb(8 124 104 / 11%);
+}

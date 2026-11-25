@@ -5,19 +5,22 @@
     "moduleResolution": "NodeNext",
     "rootDir": ".",
     "outDir": "dist",
+    "declaration": true,
     "strict": true,
     "lib": ["ES2022", "DOM"],
     "jsx": "react",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment"
   },
-  "files": ["src/css-modules.d.ts"],
   "include": [
+    "src/*.d.ts",
     "src/**/*.ts",
     "src/**/*.d.ts",
     "examples/**/*.ts",
     "examples/**/*.tsx",
     "test/**/*.ts",
-    "test/**/*.tsx"
+    "test/**/*.tsx",
+    "docs/app/**/*.d.ts",
+    "docs/app/**/*.tsx"
   ]
 }

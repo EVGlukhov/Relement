@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.sidebarIntro {
+  margin: 0 0 1.4rem;
+  padding: 0 0.5rem;
+}
+
+.sidebarKicker {
+  display: block;
+  color: #78877e;
+  font-size: 0.66rem;
+  font-weight: 760;
+  letter-spacing: 0.105em;
+  text-transform: uppercase;
+}
+
+.sidebarIntro p {
+  max-width: 13rem;
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}

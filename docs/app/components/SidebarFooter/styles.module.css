@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  margin-top: auto;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.sidebarFooter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--line);
+  padding: 1rem 0.5rem 0;
+  color: #7a8980;
+  font-size: 0.7rem;
+}
+
+.statusDot {
+  width: 0.43rem;
+  height: 0.43rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22a17f;
+  box-shadow: 0 0 0 3px rgb(34 161 127 / 12%);
+}
