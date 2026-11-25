@@ -168,3 +168,27 @@ test("renders fragments without adding a wrapper", () => {
     ["SPAN", "SPAN"],
   );
 });
+
+test("applies className and object styles to HTML elements", () => {
+  function App() {
+    return (
+      <p
+        className="greeting"
+        style={{ color: "red", backgroundColor: "lightblue" }}
+      >
+        Hello
+      </p>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<App />);
+
+  const paragraph = host.querySelector("p");
+  assert.ok(paragraph);
+
+  assert.equal(paragraph.className, "greeting");
+  assert.equal(paragraph.style.color, "red");
+  assert.equal(paragraph.style.backgroundColor, "lightblue");
+});

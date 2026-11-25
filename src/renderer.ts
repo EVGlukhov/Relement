@@ -64,6 +64,44 @@ function isFunctionComponentHost(
   return node instanceof HTMLElement && componentHostTags.has(node.localName);
 }
 
+function isStyleObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function toCssPropertyName(name: string): string {
+  return name.startsWith("--")
+    ? name
+    : name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+function updateInlineStyles(
+  element: HTMLElement,
+  previousValue: unknown,
+  value: unknown,
+): void {
+  const previous = isStyleObject(previousValue) ? previousValue : {};
+
+  if (value !== null && value !== undefined && !isStyleObject(value)) {
+    throw new TypeError("The style prop must be an object");
+  }
+
+  const next = isStyleObject(value) ? value : {};
+  const names = new Set([...Object.keys(previous), ...Object.keys(next)]);
+
+  for (const name of names) {
+    const styleValue = next[name];
+    const property = toCssPropertyName(name);
+
+    if (styleValue === undefined || styleValue === null || styleValue === "") {
+      element.style.removeProperty(property);
+    } else if (typeof styleValue === "string") {
+      element.style.setProperty(property, styleValue);
+    } else {
+      throw new TypeError(`The style value for "${name}" must be a string.`);
+    }
+  }
+}
+
 function flattenChildren(children: readonly VNodeChild[]): VNodeChild[] {
   const result: VNodeChild[] = [];
 
@@ -97,16 +135,25 @@ function updateElementProps(
 
     if (Object.is(oldValue, value)) continue;
 
+    if (name === "style") {
+      updateInlineStyles(element, oldValue, value);
+      continue;
+    }
+
     if (name.startsWith("on") && isEventHandler(oldValue)) {
       element.removeEventListener(name.slice(2).toLowerCase(), oldValue);
     }
 
     if (name.startsWith("on") && isEventHandler(value)) {
       element.addEventListener(name.slice(2).toLowerCase(), value);
-    } else if (value === false || value === null || value === undefined) {
-      element.removeAttribute(name);
     } else {
-      element.setAttribute(name, String(value));
+      const attributeName = name === "className" ? "class" : name;
+
+      if (value === false || value === null || value === undefined) {
+        element.removeAttribute(attributeName);
+      } else {
+        element.setAttribute(attributeName, String(value));
+      }
     }
   }
 
