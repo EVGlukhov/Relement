@@ -26,7 +26,7 @@ export function defineElement<TProps extends object>(
 
   class RelementElement extends HTMLElement {
     #hooks: HookRuntime;
-
+    #shadowRoot = this.attachShadow({ mode: "open" });
     constructor() {
       super();
       this.#hooks = new HookRuntime(
@@ -63,7 +63,7 @@ export function defineElement<TProps extends object>(
 
     private update(): void {
       const view = this.#hooks.render(() => render(this.readProps()));
-      reconcileChildren(this, [view]);
+      reconcileChildren(this.#shadowRoot, [view]);
       this.#hooks.commitEffects();
     }
   }

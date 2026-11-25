@@ -29,15 +29,15 @@ test("keeps state separate between element instances", () => {
   const second = document.createElement("x-counter-test");
   document.body.replaceChildren(first, second);
 
-  assert.equal(first.textContent, "0");
-  assert.equal(second.textContent, "0");
+  assert.equal(first.shadowRoot?.textContent, "0");
+  assert.equal(second.shadowRoot?.textContent, "0");
 
-  const button = first.querySelector("button");
+  const button = first.shadowRoot?.querySelector("button");
   assert.ok(button);
   button.click();
 
-  assert.equal(first.textContent, "1");
-  assert.equal(second.textContent, "0");
+  assert.equal(first.shadowRoot?.textContent, "1");
+  assert.equal(second.shadowRoot?.textContent, "0");
 });
 
 test("throws when the hook count changes between renders", () => {
@@ -159,15 +159,15 @@ test("preserves a ref between renders without rerendering on mutation", () => {
 
   const firstRef = savedRef;
   assert.ok(firstRef);
-  assert.equal(element.textContent, "0:0");
+  assert.equal(element.shadowRoot?.textContent, "0:0");
 
   firstRef.current = 5;
 
-  assert.equal(element.textContent, "0:0");
+  assert.equal(element.shadowRoot?.textContent, "0:0");
 
   forceRender();
 
-  assert.equal(element.textContent, "1:5");
+  assert.equal(element.shadowRoot?.textContent, "1:5");
   assert.strictEqual(savedRef, firstRef);
 });
 
@@ -192,4 +192,19 @@ test("throws when hook type changes at the same position", () => {
   document.body.appendChild(element);
 
   assert.throws(changeHookType, /Hook type changed at this position/);
+});
+
+test("renders defineElement inside an open shadow root", () => {
+  defineElement("x-shadow-test", () => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = "Inside";
+    return paragraph;
+  });
+
+  const element = document.createElement("x-shadow-test");
+  document.body.replaceChildren(element);
+
+  assert.ok(element.shadowRoot);
+  assert.equal(element.shadowRoot.querySelector("p")?.textContent, "Inside");
+  assert.equal(element.querySelector("p"), null);
 });
