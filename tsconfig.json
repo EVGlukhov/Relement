@@ -11,8 +11,10 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment"
   },
+  "files": ["src/css-modules.d.ts"],
   "include": [
     "src/**/*.ts",
+    "src/**/*.d.ts",
     "examples/**/*.ts",
     "examples/**/*.tsx",
     "test/**/*.ts",

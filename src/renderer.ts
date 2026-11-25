@@ -1,6 +1,7 @@
 import { HookRuntime } from "./hooks/runtime.js";
 import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
 import { Fragment } from "./vdom.js";
+import { getCSSForClassNames } from "./css-modules.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -122,6 +123,48 @@ function flattenChildren(children: readonly VNodeChild[]): VNodeChild[] {
   return result;
 }
 
+function collectCSSModuleStyles(children: readonly VNodeChild[]): string[] {
+  const stylesheets = new Set<string>();
+
+  function visit(child: VNodeChild): void {
+    if (Array.isArray(child)) {
+      child.forEach(visit);
+      return;
+    }
+
+    if (
+      child === null ||
+      child === undefined ||
+      typeof child === "boolean" ||
+      typeof child === "string" ||
+      typeof child === "number" ||
+      child instanceof Node
+    ) {
+      return;
+    }
+
+    const vnode = child as VNode;
+
+    if (vnode.type === Fragment) {
+      vnode.children.forEach(visit);
+      return;
+    }
+
+    if (typeof vnode.type !== "string") return;
+
+    const className = vnode.props.className;
+
+    if (typeof className === "string") {
+      getCSSForClassNames(className).forEach((css) => stylesheets.add(css));
+    }
+
+    vnode.children.forEach(visit);
+  }
+
+  children.forEach(visit);
+  return [...stylesheets];
+}
+
 function updateElementProps(
   element: HTMLElement,
   props: Readonly<Record<string, unknown>>,
@@ -216,8 +259,19 @@ function reconcileChild(
 export function reconcileChildren(
   parent: HTMLElement | ShadowRoot,
   children: readonly VNodeChild[],
+  styleElement?: HTMLStyleElement,
 ): void {
   const nextChildren = flattenChildren(children);
+
+  if (styleElement) {
+    styleElement.setAttribute("data-relement-styles", "");
+    styleElement.textContent = collectCSSModuleStyles(nextChildren).join("\n");
+
+    if (styleElement.textContent) {
+      nextChildren.push(styleElement);
+    }
+  }
+
   const previous = Array.from(parent.childNodes);
   const previousNodes = new Set<Node>(previous);
   const usedNodes = new Set<Node>();
@@ -291,6 +345,7 @@ function ensureComponentHost(component: FunctionComponent): string {
     #props: Record<string, unknown> = {};
     #shadowRoot: ShadowRoot;
     #hooks: HookRuntime;
+    #styleElement = document.createElement("style");
 
     constructor() {
       super();
@@ -333,7 +388,7 @@ function ensureComponentHost(component: FunctionComponent): string {
       }
 
       const view = this.#hooks.render(() => component(this.#props as never));
-      reconcileChildren(this.#shadowRoot, [view]);
+      reconcileChildren(this.#shadowRoot, [view], this.#styleElement);
       this.#hooks.commitEffects();
     }
   }

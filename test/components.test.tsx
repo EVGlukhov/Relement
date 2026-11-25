@@ -1,6 +1,7 @@
 import { Window } from "happy-dom";
 import assert from "node:assert/strict";
 import test from "node:test";
+import moduleStyles from "./fixtures/component.module.css";
 
 const dom = new Window();
 
@@ -244,4 +245,27 @@ test("renders function components inside an open shadow root", () => {
   assert.ok(appHost.shadowRoot);
   assert.equal(appHost.shadowRoot.querySelector("p")?.textContent, "Inside");
   assert.equal(appHost.querySelector("p"), null);
+});
+
+test("injects registered module styles into the component shadow root", () => {
+  function StyledDemo() {
+    return <div className={moduleStyles.box}>Styled</div>;
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<StyledDemo />);
+
+  const component = queryDeep<HTMLElement>(host, "r-styled-demo");
+  assert.ok(component?.shadowRoot);
+
+  const injectedCSS = component.shadowRoot.querySelector(
+    "style[data-relement-styles]",
+  )?.textContent;
+
+  assert.match(injectedCSS ?? "", /color:\s*red/);
+  assert.equal(
+    component.shadowRoot.querySelector(`.${moduleStyles.box}`)?.textContent,
+    "Styled",
+  );
 });

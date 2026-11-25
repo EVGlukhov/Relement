@@ -15,7 +15,7 @@
     "url": "git+https://github.com/EVGlukhov/Relement.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/build-css-modules.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/test/*.test.js"
   },
@@ -33,6 +33,8 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "happy-dom": "^21.0.4",
+    "postcss": "^8.5.33",
+    "postcss-modules": "^9.1.4",
     "typescript": "^7.0.2"
   }
 }
