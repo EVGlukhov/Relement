@@ -1,4 +1,4 @@
-import type { VNode, VNodeChild, VNodeKey, VNodeType } from "./vdom.js";
+import type { VNode, VNodeChild, VNodeKey } from "./vdom.js";
 
 type VNodeProps = Record<string, unknown> & {
   key?: VNodeKey;
@@ -20,18 +20,34 @@ export function h(
   ...children: VNodeChild[]
 ): VNode;
 
-export function h(
-  tagName: VNodeType,
+export function h<P extends object>(
+  tagName: string | ((props: P) => VNodeChild),
   props: VNodeProps | null,
   ...children: VNodeChild[]
 ): VNode {
-  const { key, ...vnodeProps } = props ?? {};
+  const propsRecord: Record<string, unknown> = { ...(props ?? {}) };
+  const key = propsRecord.key as VNodeKey | undefined;
+  delete propsRecord.key;
+
+  const componentProps = { ...propsRecord };
+
+  if (children.length === 1) {
+    componentProps.children = children[0];
+  } else if (children.length > 1) {
+    componentProps.children = children;
+  }
+
+  const renderComponent =
+    typeof tagName === "function"
+      ? () => tagName(componentProps as P)
+      : undefined;
 
   return {
     type: tagName,
     key,
-    props: vnodeProps,
+    props: propsRecord,
     children,
+    renderComponent,
   };
 }
 

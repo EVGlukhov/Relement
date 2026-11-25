@@ -21,6 +21,7 @@ export interface VNode {
   key?: VNodeKey;
   props: Readonly<Record<string, unknown>>;
   children: readonly VNodeChild[];
+  renderComponent?: () => VNodeChild;
 }
 
 export type VNodeKey = string | number;

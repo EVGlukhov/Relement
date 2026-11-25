@@ -25,18 +25,6 @@ function getComponentTag(component: FunctionComponent): string {
   return `r-${name || "anonymous"}`;
 }
 
-function getComponentProps(vnode: VNode): Record<string, unknown> {
-  const props = { ...vnode.props };
-
-  if (vnode.children.length === 1) {
-    props.children = vnode.children[0];
-  } else if (vnode.children.length > 1) {
-    props.children = vnode.children;
-  }
-
-  return props;
-}
-
 const elementProps = new WeakMap<
   HTMLElement,
   Readonly<Record<string, unknown>>
@@ -46,7 +34,7 @@ interface FunctionComponentHost extends HTMLElement {
   matchesComponent(component: FunctionComponent): boolean;
   updateComponent(
     component: FunctionComponent,
-    props: Record<string, unknown>,
+    renderComponent: () => VNodeChild,
   ): void;
 }
 
@@ -223,24 +211,29 @@ function reconcileChild(
   }
 
   const vnode = child as VNode;
-  const props = getComponentProps(vnode);
 
   if (vnode.type === Fragment) {
     throw new Error("Fragment nodes must be flattened before reconciliation.");
   }
 
   if (typeof vnode.type !== "string") {
+    const renderComponent = vnode.renderComponent;
+
+    if (!renderComponent) {
+      throw new Error("Function component VNode has no render function.");
+    }
+
     const tag = ensureComponentHost(vnode.type);
 
     if (isFunctionComponentHost(current)) {
       if (current.matchesComponent(vnode.type)) {
-        current.updateComponent(vnode.type, props);
+        current.updateComponent(vnode.type, renderComponent);
         return current;
       }
     }
 
     const host = document.createElement(tag) as FunctionComponentHost;
-    host.updateComponent(vnode.type, props);
+    host.updateComponent(vnode.type, renderComponent);
     return host;
   }
 
@@ -342,7 +335,7 @@ function ensureComponentHost(component: FunctionComponent): string {
 
   class RelementFunctionComponent extends HTMLElement {
     #component: FunctionComponent | undefined;
-    #props: Record<string, unknown> = {};
+    #renderComponent: (() => VNodeChild) | undefined;
     #shadowRoot: ShadowRoot;
     #hooks: HookRuntime;
     #styleElement = document.createElement("style");
@@ -370,10 +363,10 @@ function ensureComponentHost(component: FunctionComponent): string {
 
     updateComponent(
       component: FunctionComponent,
-      props: Record<string, unknown>,
+      renderComponent: () => VNodeChild,
     ): void {
       this.#component = component;
-      this.#props = props;
+      this.#renderComponent = renderComponent;
 
       if (this.isConnected) {
         this.update();
@@ -387,7 +380,13 @@ function ensureComponentHost(component: FunctionComponent): string {
         throw new Error("Function component host has not been initialized.");
       }
 
-      const view = this.#hooks.render(() => component(this.#props as never));
+      const renderComponent = this.#renderComponent;
+
+      if (!renderComponent) {
+        throw new Error("Function component host has no render function.");
+      }
+
+      const view = this.#hooks.render(renderComponent);
       reconcileChildren(this.#shadowRoot, [view], this.#styleElement);
       this.#hooks.commitEffects();
     }
