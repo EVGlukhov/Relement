@@ -124,3 +124,25 @@ test("preserves keyed component state when siblings reorder", () => {
   assert.equal(host.querySelector('[data-counter="a"]')?.textContent, "a: 1");
   assert.equal(host.querySelector('[data-counter="b"]')?.textContent, "b: 2");
 });
+
+test("passes props and children to function components", () => {
+  function Panel({ title, children }: { title: string; children: string }) {
+    return (
+      <article>
+        <h1>{title}</h1>
+        <p>{children}</p>
+      </article>
+    );
+  }
+
+  function App() {
+    return <Panel title="Welcome">Panel content</Panel>;
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<App />);
+
+  assert.equal(host.querySelector("h1")?.textContent, "Welcome");
+  assert.equal(host.querySelector("p")?.textContent, "Panel content");
+});

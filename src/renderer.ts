@@ -23,6 +23,18 @@ function getComponentTag(component: FunctionComponent): string {
   return `r-${name || "anonymous"}`;
 }
 
+function getComponentProps(vnode: VNode): Record<string, unknown> {
+  const props = { ...vnode.props };
+
+  if (vnode.children.length === 1) {
+    props.children = vnode.children[0];
+  } else if (vnode.children.length > 1) {
+    props.children = vnode.children;
+  }
+
+  return props;
+}
+
 const elementProps = new WeakMap<
   HTMLElement,
   Readonly<Record<string, unknown>>
@@ -109,19 +121,20 @@ function reconcileChild(
   }
 
   const vnode = child as VNode;
+  const props = getComponentProps(vnode);
 
   if (typeof vnode.type !== "string") {
     const tag = ensureComponentHost(vnode.type);
 
     if (isFunctionComponentHost(current)) {
       if (current.matchesComponent(vnode.type)) {
-        current.updateComponent(vnode.type, { ...vnode.props });
+        current.updateComponent(vnode.type, props);
         return current;
       }
     }
 
     const host = document.createElement(tag) as FunctionComponentHost;
-    host.updateComponent(vnode.type, { ...vnode.props });
+    host.updateComponent(vnode.type, props);
     return host;
   }
 
