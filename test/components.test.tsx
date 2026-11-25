@@ -84,3 +84,43 @@ test("preserves child state when its parent rerenders", () => {
   assert.equal(host.querySelector("button")?.textContent, "1");
   assert.ok(host.querySelector("r-counter"));
 });
+
+test("preserves keyed component state when siblings reorder", () => {
+  function Counter({ id }: { id: string }) {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button data-counter={id} onClick={() => setCount((value) => value + 1)}>
+        {id}: {count}
+      </button>
+    );
+  }
+
+  function App() {
+    const [reversed, setReversed] = useState(false);
+    const ids = reversed ? ["b", "a"] : ["a", "b"];
+
+    return (
+      <main>
+        <button onClick={() => setReversed((value) => !value)}>Reverse</button>
+        {ids.map((id) => (
+          <Counter key={id} id={id} />
+        ))}
+      </main>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<App />);
+
+  const counters = host.querySelectorAll<HTMLButtonElement>("[data-counter]");
+  counters[0].click();
+  counters[1].click();
+  counters[1].click();
+
+  host.querySelector<HTMLButtonElement>("main > button")?.click();
+
+  assert.equal(host.querySelector('[data-counter="a"]')?.textContent, "a: 1");
+  assert.equal(host.querySelector('[data-counter="b"]')?.textContent, "b: 2");
+});

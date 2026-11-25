@@ -1,7 +1,17 @@
 import { HookRuntime } from "./hooks/runtime.js";
-import type { FunctionComponent, VNode, VNodeChild } from "./vdom.js";
+import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
+
+const nodeKeys = new WeakMap<Node, VNodeKey>();
 
 const componentHostTags = new Set<string>();
+
+function getChildKey(child: VNodeChild): VNodeKey | undefined {
+  if (child instanceof Node || typeof child !== "object" || child === null) {
+    return undefined;
+  }
+
+  return (child as VNode).key;
+}
 
 function getComponentTag(component: FunctionComponent): string {
   const name = component.name
@@ -132,22 +142,60 @@ export function reconcileChildren(
   children: readonly VNodeChild[],
 ): void {
   const nextChildren = flattenChildren(children);
+  const previous = Array.from(parent.childNodes);
+  const previousNodes = new Set<Node>(previous);
+  const usedNodes = new Set<Node>();
+  const keys = new Set<VNodeKey>();
+
+  for (const child of nextChildren) {
+    const key = getChildKey(child);
+
+    if (key === undefined) continue;
+    if (keys.has(key)) {
+      throw new Error(`Duplicate key "${key}" among siblings.`);
+    }
+
+    keys.add(key);
+  }
 
   for (let index = 0; index < nextChildren.length; index += 1) {
-    const current = parent.childNodes.item(index) ?? undefined;
-    const next = reconcileChild(current, nextChildren[index]);
+    const child = nextChildren[index];
+    const key = getChildKey(child);
 
-    if (next !== current) {
-      if (current) {
-        parent.replaceChild(next, current);
-      } else {
-        parent.appendChild(next);
-      }
+    const current =
+      key === undefined
+        ? previous[index] &&
+          !usedNodes.has(previous[index]) &&
+          !nodeKeys.has(previous[index])
+          ? previous[index]
+          : undefined
+        : previous.find(
+            (node) => !usedNodes.has(node) && nodeKeys.get(node) === key,
+          );
+
+    const next = reconcileChild(current, child);
+
+    if (previousNodes.has(next)) {
+      usedNodes.add(next);
+    }
+
+    if (key === undefined) {
+      nodeKeys.delete(next);
+    } else {
+      nodeKeys.set(next, key);
+    }
+
+    const position = parent.childNodes.item(index);
+
+    if (next !== position) {
+      parent.insertBefore(next, position);
     }
   }
 
-  while (parent.lastChild && parent.childNodes.length > nextChildren.length) {
-    parent.removeChild(parent.lastChild);
+  for (const node of previous) {
+    if (!usedNodes.has(node) && node.parentNode === parent) {
+      parent.removeChild(node);
+    }
   }
 }
 

@@ -1,13 +1,20 @@
-import type { VNode, VNodeChild, VNodeType } from "./vdom.js";
+import type { VNode, VNodeChild, VNodeKey, VNodeType } from "./vdom.js";
+
+type VNodeProps = Record<string, unknown> & {
+  key?: VNodeKey;
+};
 
 export function h(
   tagName: VNodeType,
-  props: Record<string, unknown> | null,
+  props: VNodeProps | null,
   ...children: VNodeChild[]
 ): VNode {
+  const { key, ...vnodeProps } = props ?? {};
+
   return {
     type: tagName,
-    props: props ?? {},
+    key,
+    props: vnodeProps,
     children,
   };
 }
@@ -15,6 +22,10 @@ export function h(
 declare global {
   namespace JSX {
     interface Element extends VNode {}
+
+    interface IntrinsicAttributes {
+      key?: string | number;
+    }
 
     interface ElementChildrenAttribute {
       children: {};

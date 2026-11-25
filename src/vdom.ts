@@ -14,6 +14,9 @@ export type VNodeType = string | FunctionComponent;
 
 export interface VNode {
   type: VNodeType;
+  key?: VNodeKey;
   props: Readonly<Record<string, unknown>>;
   children: readonly VNodeChild[];
 }
+
+export type VNodeKey = string | number;
