@@ -21,6 +21,8 @@
     "test/**/*.ts",
     "test/**/*.tsx",
     "docs/app/**/*.d.ts",
-    "docs/app/**/*.tsx"
+    "docs/app/**/*.tsx",
+    "relement.config.ts",
+    "scripts/dev-server/**/*.ts"
   ]
 }
