@@ -2,6 +2,7 @@ import { HookRuntime } from "./hooks/runtime.js";
 import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
 import { Fragment } from "./vdom.js";
 import { getCSSForClassNames } from "./css-modules.js";
+import { getHotComponentId } from "./hmr.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -16,6 +17,16 @@ function getChildKey(child: VNodeChild): VNodeKey | undefined {
 }
 
 function getComponentTag(component: FunctionComponent): string {
+  const hostId = getHotComponentId(component);
+
+  if (hostId) {
+    const suffix = Array.from(new TextEncoder().encode(hostId), (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join("");
+
+    return `r-hot-${suffix}`;
+  }
+
   const name = component.name
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .toLowerCase()
@@ -391,15 +402,15 @@ function ensureComponentHost(component: FunctionComponent): string {
       this.#hooks.disconnect();
     }
 
-    matchesComponent(component: FunctionComponent): boolean {
-      return this.#component === component;
+    matchesComponent(candidate: FunctionComponent): boolean {
+      return this.#component === candidate;
     }
 
     updateComponent(
-      component: FunctionComponent,
+      nextComponent: FunctionComponent,
       renderComponent: () => VNodeChild,
     ): void {
-      this.#component = component;
+      this.#component = nextComponent;
       this.#renderComponent = renderComponent;
 
       if (this.isConnected) {
@@ -408,9 +419,9 @@ function ensureComponentHost(component: FunctionComponent): string {
     }
 
     private update(): void {
-      const component = this.#component;
+      const currentComponent = this.#component;
 
-      if (!component) {
+      if (!currentComponent) {
         throw new Error("Function component host has not been initialized.");
       }
 

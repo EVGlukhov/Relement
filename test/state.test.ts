@@ -14,6 +14,8 @@ Object.assign(globalThis, {
 const { defineElement, useState, useEffect, useRef } =
   await import("../src/index.js");
 
+const noop = (): void => {};
+
 test("keeps state separate between element instances", () => {
   defineElement("x-counter-test", () => {
     const [count, setCount] = useState(0);
@@ -41,7 +43,7 @@ test("keeps state separate between element instances", () => {
 });
 
 test("throws when the hook count changes between renders", () => {
-  let revealExtraState = (): void => {};
+  let revealExtraState = noop;
 
   defineElement("x-hook-count-test", () => {
     const [revealed, setRevealed] = useState(false);
@@ -62,8 +64,8 @@ test("throws when the hook count changes between renders", () => {
 
 test("runs effects when dependencies change and cleans up on disconnect", () => {
   const events: string[] = [];
-  let setCount: (value: number) => void = () => {};
-  let setUnrelated: (value: number) => void = () => {};
+  let setCount: (value: number) => void = noop;
+  let setUnrelated: (value: number) => void = noop;
 
   defineElement("x-effect-test", () => {
     const [count, updateCount] = useState(0);
@@ -111,7 +113,7 @@ test("runs effects when dependencies change and cleans up on disconnect", () => 
 
 test("runs effects after every render when dependencies are omitted", () => {
   const events: string[] = [];
-  let increment = (): void => {};
+  let increment = noop;
 
   defineElement("x-effect-every-render-test", () => {
     const [count, setCount] = useState(0);
@@ -140,7 +142,7 @@ test("runs effects after every render when dependencies are omitted", () => {
 
 test("preserves a ref between renders without rerendering on mutation", () => {
   let savedRef: { current: number } | undefined;
-  let forceRender = (): void => {};
+  let forceRender = noop;
 
   defineElement("x-ref-test", () => {
     const ref = useRef(0);
@@ -172,7 +174,7 @@ test("preserves a ref between renders without rerendering on mutation", () => {
 });
 
 test("throws when hook type changes at the same position", () => {
-  let changeHookType = (): void => {};
+  let changeHookType = noop;
 
   defineElement("x-hook-type-test", () => {
     const [usesState, setUsesState] = useState(true);
