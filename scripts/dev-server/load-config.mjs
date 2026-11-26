@@ -1,6 +1,20 @@
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+/** @param {unknown} value */
+function isBasePath(value) {
+  return (
+    typeof value === "string" &&
+    value.startsWith("/") &&
+    value.endsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("?") &&
+    !value.includes("#") &&
+    !value.includes("\\") &&
+    !value.split("/").includes("..")
+  );
+}
+
 /**
  * @param {unknown} value
  * @returns {value is Record<string, unknown>}
@@ -16,6 +30,7 @@ function isRecord(value) {
 function isRelementConfig(value) {
   return (
     isRecord(value) &&
+    (value.base === undefined || isBasePath(value.base)) &&
     typeof value.root === "string" &&
     value.root.trim() !== "" &&
     typeof value.html === "string" &&
@@ -40,6 +55,7 @@ function validateConfig(value, configPath) {
   }
 
   return Object.freeze({
+    base: value.base ?? "/",
     root: value.root,
     html: value.html,
     entry: value.entry,
