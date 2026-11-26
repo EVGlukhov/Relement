@@ -11,7 +11,7 @@ if (!(host instanceof HTMLElement)) {
 const rootElement = host;
 
 function getAppShadowRoot(): ShadowRoot {
-  const appHost = rootElement.querySelector("r-app");
+  const appHost = rootElement.firstElementChild;
 
   if (!(appHost instanceof HTMLElement) || !appHost.shadowRoot) {
     throw new Error("The documentation app shadow root was not created.");

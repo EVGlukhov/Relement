@@ -54,7 +54,13 @@ async function rebuild() {
   }
 }
 
-const ignoreDirectories = new Set([".git", "dist", "node_modules"]);
+const ignoreDirectories = new Set([
+  ".git",
+  ".history",
+  ".lh",
+  "dist",
+  "node_modules",
+]);
 
 const watcher = watch(watchRoot, { recursive: true }, (_event, filename) => {
   if (filename === null) return;

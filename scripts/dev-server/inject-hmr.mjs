@@ -139,7 +139,7 @@ for (const filePath of await getJavaScriptFiles(appRoot)) {
     plugins: [[createHmrPlugin, { moduleId, runtimeImport }]],
   });
 
-  if (!result?.code) {
+  if (!result || typeof result.code !== "string") {
     throw new Error(`Could not instrument HMR module: ${filePath}`);
   }
 
