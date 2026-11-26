@@ -1,4 +1,4 @@
-import { createRoot, h } from "../../src/index.js";
+import { createRoot } from "../../src/index.js";
 import { App } from "./components/App/index.js";
 import { topics } from "./docs-content.js";
 

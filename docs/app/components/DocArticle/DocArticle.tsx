@@ -1,4 +1,3 @@
-import { h } from "../../../../src/index.js";
 import type { DocTopic } from "../../docs-content.js";
 import styles from "./styles.module.css";
 import { ArticleHeader } from "../ArticleHeader/index.js";

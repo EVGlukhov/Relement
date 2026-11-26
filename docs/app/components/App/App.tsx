@@ -1,4 +1,4 @@
-import { h, useEffect, useState } from "../../../../src/index.js";
+import { useEffect, useState } from "../../../../src/index.js";
 import { groups, topics } from "../../docs-content.js";
 import styles from "./styles.module.css";
 import { DocArticle } from "../DocArticle/index.js";

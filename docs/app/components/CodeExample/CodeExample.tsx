@@ -1,4 +1,4 @@
-import { h, useState } from "../../../../src/index.js";
+import { useState } from "../../../../src/index.js";
 import styles from "./styles.module.css";
 
 type CodeExampleProps = {

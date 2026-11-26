@@ -2,7 +2,7 @@ import appStyles from "./app.module.css";
 import greetingStyles from "./greeting.module.css";
 import counterStyles from "./counter.module.css";
 
-import { createRoot, h, useState } from "../../src/index.js";
+import { createRoot, useState } from "../../src/index.js";
 
 type GreetingProps = {
   name: string | null;

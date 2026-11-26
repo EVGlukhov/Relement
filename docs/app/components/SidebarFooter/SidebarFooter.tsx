@@ -1,4 +1,3 @@
-import { h } from "../../../../src/index.js";
 import styles from "./styles.module.css";
 
 export function SidebarFooter() {

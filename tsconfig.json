@@ -8,9 +8,11 @@
     "declaration": true,
     "strict": true,
     "lib": ["ES2022", "DOM"],
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jgluhov/relement",
+    "paths": {
+      "@jgluhov/relement/jsx-runtime": ["./src/jsx-runtime.js"]
+    }
   },
   "include": [
     "src/*.d.ts",
