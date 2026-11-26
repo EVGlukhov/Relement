@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px clamp(22px, 7vw, 80px) 48px;
+  background:
+    radial-gradient(ellipse at 75% 15%, #5b45b333, transparent 34rem),
+    radial-gradient(ellipse at 12% 65%, #21c8a314, transparent 30rem);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #f5f4ff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 11px;
+  color: #10111b;
+  background: #b7f36b;
+  font-size: 20px;
+}
+
+.githubLink,
+.textLink {
+  color: #c5c3d6;
+  text-decoration: none;
+}
+
+.githubLink:hover,
+.textLink:hover {
+  color: #b7f36b;
+}
+
+.hero {
+  max-width: 760px;
+  margin: 112px 0 84px;
+}
+
+.eyebrow,
+.cardLabel {
+  color: #b7f36b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.title {
+  margin: 22px 0;
+  font-size: clamp(48px, 8vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+}
+
+.titleAccent {
+  color: #b7f36b;
+}
+
+.intro {
+  max-width: 590px;
+  color: #aaa9bd;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 19px;
+  border: 1px solid #ffffff24;
+  border-radius: 10px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.buttonPrimary {
+  color: #10111b;
+  border-color: #b7f36b;
+  background: #b7f36b;
+}
+
+.buttonSecondary {
+  color: #f5f4ff;
+  background: #ffffff08;
+}
+
+.counterCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border: 1px solid #ffffff1c;
+  border-radius: 18px;
+  background: #ffffff08;
+}
+
+.cardLabel {
+  margin: 0 0 12px;
+}
+
+.counterCard h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.counterCopy {
+  margin: 0;
+  color: #aaa9bd;
+}
+
+.counterCopy strong {
+  color: #b7f36b;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 20px 22px 36px;
+  }
+
+  .hero {
+    margin: 88px 0 68px;
+  }
+
+  .counterCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

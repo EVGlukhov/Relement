@@ -3,6 +3,7 @@ import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
 import { Fragment } from "./vdom.js";
 import { getCSSForClassNames } from "./css-modules.js";
 import { getHotComponentId, subscribeToHotComponent } from "./hmr.js";
+import { getGlobalStyles } from "./global-styles.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -303,7 +304,10 @@ export function reconcileChildren(
 
   if (styleElement) {
     styleElement.setAttribute("data-relement-styles", "");
-    styleElement.textContent = collectCSSModuleStyles(nextChildren).join("\n");
+    styleElement.textContent = [
+      ...getGlobalStyles(),
+      ...collectCSSModuleStyles(nextChildren),
+    ].join("\n");
 
     if (styleElement.textContent) {
       nextChildren.push(styleElement);

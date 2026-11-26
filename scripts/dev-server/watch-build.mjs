@@ -4,7 +4,7 @@ import { performance } from "node:perf_hooks";
 import { loadConfig } from "./load-config.mjs";
 import { runBuild } from "./run-build.mjs";
 import { createHttpServer } from "./http-server.mjs";
-import { logBanner, logError, logInfo, logSuccess } from "./logger.mjs";
+import { logBanner, logError, logInfo, logSuccess } from "../logger.mjs";
 
 const projectRoot = process.cwd();
 const config = await loadConfig(resolve(projectRoot, "relement.config.ts"));

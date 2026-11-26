@@ -12,7 +12,7 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { createRoot } = await import("../src/index.js");
+const { createRoot, registerGlobalStyles } = await import("../src/index.js");
 
 function PropsPanel({ title, children }: { title: string; children: string }) {
   return (
@@ -64,6 +64,10 @@ function queryDeep<T extends Element>(
   selector: string,
 ): T | undefined {
   return queryAllDeep<T>(root, selector)[0];
+}
+
+function GlobalStylesDemo() {
+  return <div className="global-style-test">Styled globally</div>;
 }
 
 test("passes props and children to function components", () => {
@@ -143,4 +147,26 @@ test("injects registered module styles into the component shadow root", () => {
     component.shadowRoot.querySelector(`.${moduleStyles.box}`)?.textContent,
     "Styled",
   );
+});
+
+test("injects registered global styles into the document and shadow root", () => {
+  const css = ".global-style-test { color: rebeccapurple; }";
+  registerGlobalStyles("test/global.css", css);
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<GlobalStylesDemo />);
+
+  const component = host.querySelector("r-global-styles-demo");
+  assert.ok(component?.shadowRoot);
+
+  const shadowStyles = component.shadowRoot.querySelector(
+    "style[data-relement-styles]",
+  );
+  assert.match(shadowStyles?.textContent ?? "", /color:\s*rebeccapurple/);
+
+  const documentStyles = document.head.querySelector(
+    "style[data-relement-global-styles]",
+  );
+  assert.match(documentStyles?.textContent ?? "", /color:\s*rebeccapurple/);
 });

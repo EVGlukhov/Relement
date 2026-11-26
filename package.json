@@ -25,8 +25,15 @@
     "lint:fix": "oxlint --fix"
   },
   "files": [
-    "dist/src"
+    "dist/src",
+    "bin",
+    "scripts/cli",
+    "templates/relement",
+    "scripts/logger.mjs"
   ],
+  "bin": {
+    "relement": "./bin/relement.mjs"
+  },
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "exports": {
@@ -47,5 +54,8 @@
     "postcss": "^8.5.33",
     "postcss-modules": "^9.1.4",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.2"
   }
 }

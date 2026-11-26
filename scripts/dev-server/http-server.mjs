@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { logError } from "./logger.mjs";
+import { logError } from "../logger.mjs";
 
 const hmrClientPath = fileURLToPath(
   new URL("./hmr-client.js", import.meta.url),

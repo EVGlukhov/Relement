@@ -1,0 +1,17 @@
+{
+  "name": "__PROJECT_NAME__",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "relement",
+    "build": "relement build",
+    "preview": "relement preview"
+  },
+  "dependencies": {
+    "@jgluhov/relement": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

@@ -16,6 +16,7 @@ export type {
 export { h } from "./jsx.js";
 export { createRoot, type Root } from "./root.js";
 export { Fragment, type VNodeChild } from "./vdom.js";
+export { registerGlobalStyles } from "./global-styles.js";
 
 export function defineElement<TProps extends object>(
   name: string,
