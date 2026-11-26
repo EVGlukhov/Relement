@@ -18,9 +18,10 @@ function isMissingFile(error) {
  * @param {import("node:http").ServerResponse} response
  * @param {string} htmlPath
  * @param {string} outputRoot
+ * @param {Set<import("node:http").ServerResponse>} clients
  * @returns {Promise<void>}
  */
-async function handleRequest(request, response, htmlPath, outputRoot) {
+async function handleRequest(request, response, htmlPath, outputRoot, clients) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     response.writeHead(405, { Allow: "GET, HEAD" }).end("Method not allowed");
     return;
@@ -34,6 +35,24 @@ async function handleRequest(request, response, htmlPath, outputRoot) {
     );
   } catch {
     response.writeHead(400).end("Bad request");
+    return;
+  }
+
+  if (pathname === "/__relement/events") {
+    if (request.method !== "GET") {
+      response.writeHead(405, { Allow: "GET" }).end("Method not allowed");
+      return;
+    }
+
+    response.writeHead(200, {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+    response.write(": connected\n\n");
+
+    clients.add(response);
+    response.on("close", () => clients.delete(response));
     return;
   }
 
@@ -92,8 +111,11 @@ export function createHttpServer(projectRoot, config) {
   const htmlPath = resolve(projectRoot, config.root, config.html);
   const outputRoot = resolve(projectRoot, "dist");
 
-  return createServer((request, response) => {
-    void handleRequest(request, response, htmlPath, outputRoot).catch(
+  /** @type {Set<import("node:http").ServerResponse>} */
+  const clients = new Set();
+
+  const server = createServer((request, response) => {
+    void handleRequest(request, response, htmlPath, outputRoot, clients).catch(
       (error) => {
         logError("HTTP request failed", error);
 
@@ -107,4 +129,12 @@ export function createHttpServer(projectRoot, config) {
       },
     );
   });
+
+  function notifyReload() {
+    for (const client of clients) {
+      client.write("event: reload\ndata: reload\n\n");
+    }
+  }
+
+  return { server, notifyReload };
 }
