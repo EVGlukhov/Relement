@@ -45,7 +45,7 @@ export function h<P extends object>(
   props: VNodeProps | null,
   ...children: VNodeChild[]
 ): VNode {
-  const propsRecord: Record<string, unknown> = { ...(props ?? {}) };
+  const propsRecord: Record<string, unknown> = { ...props };
   const key = propsRecord.key as VNodeKey | undefined;
 
   delete propsRecord.key;

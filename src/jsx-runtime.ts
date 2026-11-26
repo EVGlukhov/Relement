@@ -13,7 +13,7 @@ function createJSXElement<P extends object = Record<string, unknown>>(
   props: RuntimeProps<P> | null,
   key?: VNodeKey,
 ): VNode {
-  const propsRecord: Record<string, unknown> = { ...(props ?? {}) };
+  const propsRecord: Record<string, unknown> = { ...props };
   const propKey = propsRecord.key as VNodeKey | undefined;
   const hasChildren = Object.hasOwn(propsRecord, "children");
   const children = hasChildren ? [propsRecord.children as VNodeChild] : [];

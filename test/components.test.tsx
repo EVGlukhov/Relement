@@ -12,7 +12,7 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { createRoot, h, useState, Fragment } = await import("../src/index.js");
+const { createRoot, h, useState } = await import("../src/index.js");
 
 function queryAllDeep<T extends Element>(
   root: ParentNode,

@@ -18,7 +18,9 @@
     "build": "tsc && node scripts/build-css-modules.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/test/*.test.js",
-    "build:docs": "npm run build && node scripts/build-docs.mjs"
+    "build:docs": "npm run build && node scripts/build-docs.mjs",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
   },
   "files": [
     "dist/src"
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "happy-dom": "^21.0.4",
+    "oxlint": "^1.95.0",
     "postcss": "^8.5.33",
     "postcss-modules": "^9.1.4",
     "typescript": "^7.0.2"
