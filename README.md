@@ -1,30 +1,40 @@
 # Relement
 
-A lightweight JavaScript UI framework built on native Custom Elements.
+A lightweight TypeScript UI framework built on native Custom Elements, function
+components, and hooks.
 
-> The npm package is not published yet. The full documentation site is
-> available at [Relement Docs](https://evglukhov.github.io/Relement/).
+[Documentation](https://evglukhov.github.io/Relement/) ·
+[Quick start](https://evglukhov.github.io/Relement/#quick-start) ·
+[API reference](https://evglukhov.github.io/Relement/#api) ·
+[GitHub](https://github.com/EVGlukhov/Relement)
 
-## TypeScript components
+## Learn Relement
 
-Configure TypeScript to use Relement's JSX factory:
+- [Quick start](https://evglukhov.github.io/Relement/#quick-start)
+- [TypeScript and automatic JSX](https://evglukhov.github.io/Relement/#typescript)
+- [Function components](https://evglukhov.github.io/Relement/#components)
+- [Props and children](https://evglukhov.github.io/Relement/#props-children)
+- [Rendering and fragments](https://evglukhov.github.io/Relement/#rendering)
+- [State, effects, and refs](https://evglukhov.github.io/Relement/#state)
+- [Keys and reconciliation](https://evglukhov.github.io/Relement/#keys)
+- [Custom Elements and Shadow DOM](https://evglukhov.github.io/Relement/#custom-elements)
+- [CSS Modules](https://evglukhov.github.io/Relement/#css-modules)
+- [Public API](https://evglukhov.github.io/Relement/#api)
+
+## TypeScript and JSX
+
+Relement supports TypeScript's automatic JSX runtime:
 
 ```json
 {
   "compilerOptions": {
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jgluhov/relement"
   }
 }
 ```
 
-Import `h` in each TSX file and declare component props with a TypeScript
-type or interface:
-
 ```tsx
-import { h } from "@jgluhov/relement";
-
 type GreetingProps = {
   name: string;
 };
@@ -32,56 +42,19 @@ type GreetingProps = {
 function Greeting({ name }: GreetingProps) {
   return <p>Hello, {name}</p>;
 }
-
-const greeting = <Greeting name="Ada" />;
 ```
 
-TypeScript checks component props in JSX and direct `h()` calls. For example,
-these calls are type errors because `name` must be a string and is required:
+The JSX runtime is imported automatically; components do not need to import
+`h`.
 
-```tsx
-// @ts-expect-error name must be a string
-const invalidName = <Greeting name={42} />;
+## Project status
 
-// @ts-expect-error name is required
-const missingName = <Greeting />;
+The npm package is private and has not been published yet. To explore the
+current implementation locally:
+
+```sh
+git clone https://github.com/EVGlukhov/Relement.git
+cd Relement
+npm install
+npm test
 ```
-
-The special `key` attribute is accepted separately from declared component
-props:
-
-```tsx
-const keyedGreeting = <Greeting key="ada" name="Ada" />;
-```
-
-## Children
-
-Declare a `children` prop to type-check JSX children. Make it optional if the
-component can be used without children:
-
-```tsx
-import { h, type VNodeChild } from "@jgluhov/relement";
-
-type PanelProps = {
-  title: string;
-  children: VNodeChild;
-};
-
-function Panel({ title, children }: PanelProps) {
-  return (
-    <section>
-      <h2>{title}</h2>
-      <div>{children}</div>
-    </section>
-  );
-}
-
-const panel = (
-  <Panel title="Status">
-    <span>Ready</span>
-  </Panel>
-);
-```
-
-Use `children?: VNodeChild` if the component can be used without children. The
-JSX child type is checked against the declared `children` prop.

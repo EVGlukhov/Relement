@@ -39,16 +39,15 @@ npm test`,
     group: "Start",
     title: "Configure TypeScript for TSX",
     lead:
-      "Relement uses TypeScript's classic JSX transform. Configure the factory names and import them in each TSX module.",
+      "Relement uses TypeScript's automatic JSX runtime. Configure the runtime once and use JSX without importing h in each TSX module.",
     example: String.raw`{
   "compilerOptions": {
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@jgluhov/relement"
   }
 }`,
     notes: [
-      "Import h wherever you write JSX. Import Fragment when using fragment syntax.",
+      "The automatic runtime imports jsx/jsxs and Fragment from @jgluhov/relement/jsx-runtime.",
     ],
   },
   {
@@ -57,9 +56,7 @@ npm test`,
     title: "Function components",
     lead:
       "A function component receives one props object and returns a renderable child such as JSX, a fragment, text, a DOM node, or null.",
-    example: String.raw`import { h } from "@jgluhov/relement";
-
-type GreetingProps = {
+    example: String.raw`type GreetingProps = {
   name: string;
 };
 
@@ -81,7 +78,7 @@ function App() {
     title: "Props and children",
     lead:
       "Declare props with a TypeScript type or interface. JSX and direct h() calls check required props and value types.",
-    example: String.raw`import { h, type VNodeChild } from "@jgluhov/relement";
+    example: String.raw`import type { VNodeChild } from "@jgluhov/relement";
 
 type PanelProps = {
   title: string;
@@ -113,20 +110,20 @@ const panel = (
     title: "Rendering and fragments",
     lead:
       "createRoot(host).render(child) mounts a renderable child into an existing element. Arrays and fragments are flattened without wrapper elements.",
-    example: String.raw`import { Fragment, createRoot, h } from "@jgluhov/relement";
+    example: String.raw`import { createRoot } from "@jgluhov/relement";
 
 function Labels() {
   return (
-    <Fragment>
+    <>
       <span>First</span>
       <span>Second</span>
-    </Fragment>
+    </>
   );
 }
 
 createRoot(host).render(<Labels />);`,
     notes: [
-      "With jsxFragmentFactory configured, the same component can use <>...</>.",
+      "The automatic JSX runtime handles fragments without importing Fragment.",
     ],
   },
   {
@@ -135,7 +132,7 @@ createRoot(host).render(<Labels />);`,
     title: "State with useState",
     lead:
       "useState(initialValue) returns the current value and a setter. Pass a value or an updater function based on the previous state.",
-    example: String.raw`import { h, useState } from "@jgluhov/relement";
+    example: String.raw`import { useState } from "@jgluhov/relement";
 
 function Counter() {
   const [count, setCount] = useState(0);
