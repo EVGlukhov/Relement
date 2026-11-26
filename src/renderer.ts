@@ -2,7 +2,7 @@ import { HookRuntime } from "./hooks/runtime.js";
 import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
 import { Fragment } from "./vdom.js";
 import { getCSSForClassNames } from "./css-modules.js";
-import { getHotComponentId } from "./hmr.js";
+import { getHotComponentId, subscribeToHotComponent } from "./hmr.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -384,6 +384,7 @@ function ensureComponentHost(component: FunctionComponent): string {
     #shadowRoot: ShadowRoot;
     #hooks: HookRuntime;
     #styleElement = document.createElement("style");
+    #unsubscribeHotUpdate: (() => void) | undefined;
 
     constructor() {
       super();
@@ -395,10 +396,23 @@ function ensureComponentHost(component: FunctionComponent): string {
     }
 
     connectedCallback(): void {
+      const currentComponent = this.#component;
+      const hotId = currentComponent
+        ? getHotComponentId(currentComponent)
+        : undefined;
+
+      if (hotId && !this.#unsubscribeHotUpdate) {
+        this.#unsubscribeHotUpdate = subscribeToHotComponent(hotId, () =>
+          this.update(),
+        );
+      }
+
       this.update();
     }
 
     disconnectedCallback(): void {
+      this.#unsubscribeHotUpdate?.();
+      this.#unsubscribeHotUpdate = undefined;
       this.#hooks.disconnect();
     }
 

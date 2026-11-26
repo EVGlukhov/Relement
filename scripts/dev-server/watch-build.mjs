@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { resolve, relative, sep } from "node:path";
 import { watch } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { loadConfig } from "./load-config.mjs";
@@ -12,6 +12,9 @@ const watchRoot = resolve(projectRoot, config.root);
 
 let building = false;
 let buildQueued = false;
+
+/** @type {Set<string>} */
+const pendingModuleUpdates = new Set();
 
 /** @type {NodeJS.Timeout | undefined} */
 let debounceTimer;
@@ -27,15 +30,22 @@ async function rebuild() {
   try {
     do {
       buildQueued = false;
+      const moduleUpdates = [...pendingModuleUpdates];
+      pendingModuleUpdates.clear();
 
       try {
         const startedAt = performance.now();
         await runBuild(projectRoot);
-        notifyReload();
+        for (const modulePath of moduleUpdates) {
+          notifyUpdate(modulePath);
+        }
         logSuccess(
           `Build complete in ${Math.round(performance.now() - startedAt)} ms`,
         );
       } catch (error) {
+        for (const modulePath of moduleUpdates) {
+          pendingModuleUpdates.add(modulePath);
+        }
         logError("Build failed", error);
       }
     } while (buildQueued);
@@ -55,6 +65,12 @@ const watcher = watch(watchRoot, { recursive: true }, (_event, filename) => {
     return;
   }
 
+  const modulePath = relative(projectRoot, resolve(watchRoot, changedPath))
+    .split(sep)
+    .join("/");
+
+  pendingModuleUpdates.add(modulePath);
+
   if (debounceTimer) clearTimeout(debounceTimer);
 
   debounceTimer = setTimeout(() => {
@@ -72,7 +88,7 @@ watcher.on("error", (error) => {
 logBanner();
 logInfo(`Starting build in ${watchRoot}`);
 
-const { server, notifyReload } = createHttpServer(projectRoot, config);
+const { server, notifyUpdate } = createHttpServer(projectRoot, config);
 
 /** @param {NodeJS.ErrnoException} error */
 function handleServerError(error) {

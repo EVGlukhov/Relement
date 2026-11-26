@@ -8,7 +8,7 @@ export function runBuild(projectRoot) {
   return new Promise((resolve, reject) => {
     const command = process.platform === "win32" ? "npm.cmd" : "npm";
 
-    const child = spawn(command, ["--silent", "run", "build"], {
+    const child = spawn(command, ["--silent", "run", "build:dev"], {
       cwd: projectRoot,
       stdio: "inherit",
       shell: process.platform === "win32",

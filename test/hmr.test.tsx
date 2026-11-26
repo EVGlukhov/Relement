@@ -18,9 +18,7 @@ function CounterV1() {
   const [count, setCount] = useState(0);
 
   return (
-    <button onClick={() => setCount((value) => value + 1)}>
-      v1: {count}
-    </button>
+    <button onClick={() => setCount((value) => value + 1)}>v1: {count}</button>
   );
 }
 
@@ -28,9 +26,7 @@ function CounterV2() {
   const [count, setCount] = useState(0);
 
   return (
-    <button onClick={() => setCount((value) => value + 1)}>
-      v2: {count}
-    </button>
+    <button onClick={() => setCount((value) => value + 1)}>v2: {count}</button>
   );
 }
 
@@ -67,8 +63,7 @@ test("preserves state when a hot component implementation changes", () => {
 
   queryDeep<HTMLButtonElement>(host, "button")?.click();
 
-  const CounterAfter = hotComponent("test#Counter", CounterV2);
-  root.render(<CounterAfter />);
+  hotComponent("test#Counter", CounterV2);
 
   assert.strictEqual(host.firstElementChild, originalHost);
   assert.equal(

@@ -3,6 +3,7 @@ import type { FunctionComponent } from "./vdom.js";
 type HotRecord = {
   current: FunctionComponent;
   proxy: FunctionComponent;
+  subscribers: Set<() => void>;
 };
 
 const records = new Map<string, HotRecord>();
@@ -19,7 +20,15 @@ export function hotComponent<TComponent extends FunctionComponent>(
   const existing = records.get(id);
 
   if (existing) {
+    const changed = existing.current !== implementation;
     existing.current = implementation;
+
+    if (changed) {
+      for (const update of existing.subscribers) {
+        update();
+      }
+    }
+
     return existing.proxy as TComponent;
   }
 
@@ -27,7 +36,7 @@ export function hotComponent<TComponent extends FunctionComponent>(
 
   const proxy: FunctionComponent = (props) => record.current(props);
 
-  record = { current: implementation, proxy };
+  record = { current: implementation, proxy, subscribers: new Set() };
   records.set(id, record);
   componentIds.set(proxy, id);
 
@@ -38,4 +47,21 @@ export function getHotComponentId(
   component: FunctionComponent,
 ): string | undefined {
   return componentIds.get(component);
+}
+
+export function subscribeToHotComponent(
+  id: string,
+  update: () => void,
+): () => void {
+  const record = records.get(id);
+
+  if (!record) {
+    throw new Error(`Hot component "${id}" is not registered.`);
+  }
+
+  record.subscribers.add(update);
+
+  return () => {
+    record.subscribers.delete(update);
+  };
 }

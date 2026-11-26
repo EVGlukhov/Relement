@@ -1,7 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { logError } from "./logger.mjs";
+
+const hmrClientPath = fileURLToPath(
+  new URL("./hmr-client.js", import.meta.url),
+);
 
 /** @param {unknown} error */
 function isMissingFile(error) {
@@ -18,10 +23,18 @@ function isMissingFile(error) {
  * @param {import("node:http").ServerResponse} response
  * @param {string} htmlPath
  * @param {string} outputRoot
+ * @param {string} clientScriptPath
  * @param {Set<import("node:http").ServerResponse>} clients
  * @returns {Promise<void>}
  */
-async function handleRequest(request, response, htmlPath, outputRoot, clients) {
+async function handleRequest(
+  request,
+  response,
+  htmlPath,
+  outputRoot,
+  clientScriptPath,
+  clients,
+) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     response.writeHead(405, { Allow: "GET, HEAD" }).end("Method not allowed");
     return;
@@ -56,9 +69,13 @@ async function handleRequest(request, response, htmlPath, outputRoot, clients) {
     return;
   }
 
-  let filePath = htmlPath;
+  let filePath;
 
-  if (pathname !== "/") {
+  if (pathname === "/__relement/client.js") {
+    filePath = clientScriptPath;
+  } else if (pathname === "/") {
+    filePath = htmlPath;
+  } else {
     filePath = resolve(outputRoot, `.${pathname}`);
 
     if (
@@ -85,16 +102,10 @@ async function handleRequest(request, response, htmlPath, outputRoot, clients) {
 
   if (pathname === "/") {
     const html = content.toString("utf8");
-    const liveReloadScript = `
-      <script type="module">
-        const events = new EventSource("/__relement/events");
-        events.addEventListener("reload", () => window.location.reload());
-      </script>
-    `;
+    const hmrScript =
+      '<script type="module" src="/__relement/client.js"></script>';
 
-    content = Buffer.from(
-      html.replace("</body>", `${liveReloadScript}</body>`),
-    );
+    content = Buffer.from(html.replace("</body>", `${hmrScript}</body>`));
   }
 
   const contentTypes = new Map([
@@ -129,26 +140,32 @@ export function createHttpServer(projectRoot, config) {
   const clients = new Set();
 
   const server = createServer((request, response) => {
-    void handleRequest(request, response, htmlPath, outputRoot, clients).catch(
-      (error) => {
-        logError("HTTP request failed", error);
+    void handleRequest(
+      request,
+      response,
+      htmlPath,
+      outputRoot,
+      hmrClientPath,
+      clients,
+    ).catch((error) => {
+      logError("HTTP request failed", error);
 
-        if (!response.headersSent) {
-          response.writeHead(500, {
-            "Content-Type": "text/plain; charset=utf-8",
-          });
-        }
+      if (!response.headersSent) {
+        response.writeHead(500, {
+          "Content-Type": "text/plain; charset=utf-8",
+        });
+      }
 
-        response.end("Internal server error");
-      },
-    );
+      response.end("Internal server error");
+    });
   });
 
-  function notifyReload() {
+  /** @param {string} modulePath */
+  function notifyUpdate(modulePath) {
     for (const client of clients) {
-      client.write("event: reload\ndata: reload\n\n");
+      client.write(`event: update\ndata: ${JSON.stringify(modulePath)}\n\n`);
     }
   }
 
-  return { server, notifyReload };
+  return { server, notifyUpdate };
 }
