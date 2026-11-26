@@ -83,6 +83,20 @@ async function handleRequest(request, response, htmlPath, outputRoot, clients) {
     throw error;
   }
 
+  if (pathname === "/") {
+    const html = content.toString("utf8");
+    const liveReloadScript = `
+      <script type="module">
+        const events = new EventSource("/__relement/events");
+        events.addEventListener("reload", () => window.location.reload());
+      </script>
+    `;
+
+    content = Buffer.from(
+      html.replace("</body>", `${liveReloadScript}</body>`),
+    );
+  }
+
   const contentTypes = new Map([
     [".html", "text/html; charset=utf-8"],
     [".js", "text/javascript; charset=utf-8"],
