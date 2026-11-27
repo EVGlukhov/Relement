@@ -41,4 +41,8 @@ export namespace JSX {
   export interface IntrinsicElements {
     [tagName: string]: Record<string, unknown>;
   }
+
+  export type ElementType =
+    | keyof IntrinsicElements
+    | ((props: never) => VNodeChild);
 }

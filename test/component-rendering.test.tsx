@@ -2,6 +2,7 @@ import { Window } from "happy-dom";
 import assert from "node:assert/strict";
 import test from "node:test";
 import moduleStyles from "./fixtures/component.module.css";
+import { createResource, type Resource } from "../src/resource.js";
 
 const dom = new Window();
 
@@ -12,7 +13,8 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { createRoot, registerGlobalStyles } = await import("../src/index.js");
+const { createRoot, registerGlobalStyles, Suspense } =
+  await import("../src/index.js");
 
 function PropsPanel({ title, children }: { title: string; children: string }) {
   return (
@@ -68,6 +70,18 @@ function queryDeep<T extends Element>(
 
 function GlobalStylesDemo() {
   return <div className="global-style-test">Styled globally</div>;
+}
+
+function AsyncText({ resource }: { resource: Resource<string> }) {
+  return <p>{resource.read()}</p>;
+}
+
+function SuspenseDemo({ resource }: { resource: Resource<string> }) {
+  return (
+    <Suspense fallback={<p>Loading profile...</p>}>
+      <AsyncText resource={resource} />
+    </Suspense>
+  );
 }
 
 test("passes props and children to function components", () => {
@@ -169,4 +183,19 @@ test("injects registered global styles into the document and shadow root", () =>
     "style[data-relement-global-styles]",
   );
   assert.match(documentStyles?.textContent ?? "", /color:\s*rebeccapurple/);
+});
+
+test("shows fallback when a child suspends", async () => {
+  const resource = createResource(() => new Promise<string>(() => {}));
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+
+  createRoot(host).render(<SuspenseDemo resource={resource} />);
+
+  await new Promise<void>((resolve) => queueMicrotask(resolve));
+
+  assert.equal(
+    queryDeep<HTMLParagraphElement>(host, "p")?.textContent,
+    "Loading profile...",
+  );
 });
