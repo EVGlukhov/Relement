@@ -43,7 +43,7 @@
     "templates/relement/src"
   ],
   "bin": {
-    "relement": "./bin/relement.mjs"
+    "relement": "bin/relement.mjs"
   },
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
