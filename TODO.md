@@ -12,6 +12,15 @@
   - Add tests for successful and invalid submissions, async pending state,
     native validation behavior, live validation, and multiple errors per field.
 
+- [ ] **Add a declarative `ViewTransition` component**
+  - Start with enter and exit animations for conditionally rendered content.
+  - Expand to use the browser View Transition API for updates and shared-element
+    transitions.
+  - Respect `prefers-reduced-motion`, handle unsupported browsers, and clean up
+    correctly if a transition is interrupted or its parent is disconnected.
+  - Add tests for enter, exit, updates, interrupted transitions, and reduced
+    motion.
+
 - [ ] **Support same-page anchor navigation across Shadow DOM**
   - Allow ordinary links such as `<a href="#demo">` to find and scroll to an
     element rendered inside a nested, open Relement Shadow DOM.
