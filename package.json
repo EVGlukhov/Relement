@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "description": "A lightweight JavaScript UI framework built on native Custom Elements.",
   "license": "ISC",
-  "author": "",
-  "private": true,
+  "author": {
+    "name": "Evgeny Glukhov",
+    "url": "https://github.com/EVGlukhov"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "homepage": "https://github.com/EVGlukhov/Relement#readme",
   "bugs": {
@@ -22,15 +27,20 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/test/*.test.js",
     "lint": "oxlint",
-    "lint:fix": "oxlint --fix"
+    "lint:fix": "oxlint --fix",
+    "prepack": "npm run build"
   },
   "files": [
     "dist/src",
     "bin",
     "scripts/cli",
-    "templates/relement",
     "scripts/logger.mjs",
-    "scripts/dev-server"
+    "scripts/dev-server",
+    "templates/relement/package.json",
+    "templates/relement/relement.config.js",
+    "templates/relement/tsconfig.json",
+    "templates/relement/index.html",
+    "templates/relement/src"
   ],
   "bin": {
     "relement": "./bin/relement.mjs"

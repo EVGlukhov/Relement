@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { build, transform } from "esbuild";
 import postcss from "postcss";
+import postcssModules from "postcss-modules";
 
 /** @param {{ minify: boolean }} options */
 function cssModulesPlugin({ minify }) {
@@ -13,9 +14,14 @@ function cssModulesPlugin({ minify }) {
         let classes = {};
         const source = await readFile(path, "utf8");
 
-        const result = await postcss(/* ... */).process(source, {
-          from: path,
-        });
+        const result = await postcss([
+          postcssModules({
+            generateScopedName: "[name]__[local]__[hash:base64:5]",
+            getJSON(_cssPath, json) {
+              classes = json;
+            },
+          }),
+        ]).process(source, { from: path });
         const css = minify
           ? (await transform(result.css, { loader: "css", minify: true })).code
           : result.css;

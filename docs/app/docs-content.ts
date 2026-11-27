@@ -25,13 +25,14 @@ export const topics: readonly DocTopic[] = [
     group: "Start",
     title: "Quick start",
     lead:
-      "The npm package is private and has not been published yet. To explore the current implementation, clone the repository and run its checks.",
-    example: String.raw`git clone https://github.com/EVGlukhov/Relement.git
-cd Relement
+      "Create a starter project with the Relement CLI, install its dependencies, and start the development server.",
+    example: String.raw`npx @jgluhov/relement create my-app
+cd my-app
 npm install
-npm test`,
+npm run dev`,
     notes: [
-      "The examples in this guide import the package as @jgluhov/relement. Until the first release, use the repository source entry point.",
+      "To add Relement to an existing project, install it with npm install @jgluhov/relement.",
+      "The scaffold includes TypeScript, the automatic JSX runtime, a starter component, and a Relement CLI config.",
     ],
   },
   {
@@ -250,15 +251,16 @@ const heading = app?.shadowRoot?.querySelector("h1");`,
     group: "Browser platform",
     title: "CSS Modules",
     lead:
-      "Import a .module.css file and use its class map with className. Relement's repository build registers generated classes and injects matching CSS into the component's Shadow Root.",
+      "Import a .module.css file and use its class map with className. The Relement CLI transforms CSS Modules, generates scoped class names, and registers the styles for component Shadow Roots.",
     example: String.raw`import styles from "./counter.module.css";
 
 function Counter() {
   return <button className={styles.button}>Count</button>;
 }`,
     notes: [
-      "The repository build currently processes CSS Modules under src, examples, test, and docs/app.",
-      "Applications outside the repository need a compatible CSS Modules build step.",
+      "The CLI handles CSS Modules during both relement dev and relement build.",
+      "Component styles are injected into the Shadow Root when the component uses one of the module's classes.",
+      "If you use another bundler, configure it to transform .module.css files and register their styles with Relement.",
     ],
   },
   {
@@ -280,6 +282,46 @@ defineElement(
 );`,
     notes: [
       "The registered element uses an open Shadow Root and supports Relement hooks inside its render callback.",
+    ],
+  },
+  {
+    id: "cli",
+    group: "Tooling",
+    title: "CLI commands",
+    lead:
+      "The relement executable scaffolds projects, runs a watched development server, builds production assets, and previews a production build.",
+    example: String.raw`relement --help
+relement create my-app
+cd my-app
+npm install
+npm run dev
+npm run build
+npm run preview`,
+    notes: [
+      "create <project-name> accepts lowercase letters, numbers, and hyphens.",
+      "dev builds the app, serves it on the configured port, watches project files, and reloads the page after changes.",
+      "build writes optimized assets and index.html to dist/.",
+      "preview requires a production build and serves dist/ at http://127.0.0.1:4173 without HMR.",
+      "The generated project provides npm run dev, npm run build, and npm run preview scripts.",
+    ],
+  },
+  {
+    id: "cli-config",
+    group: "Tooling",
+    title: "Configure the CLI",
+    lead:
+      "The CLI loads relement.config.js from the current project directory. Configure the source entry, HTML file, and development port there.",
+    example: String.raw`export default {
+  base: "/",
+  root: ".",
+  html: "index.html",
+  entry: "src/main.tsx",
+  port: 3000,
+};`,
+    notes: [
+      "root, html, entry, and port are required. html and entry are resolved relative to root.",
+      "base is optional and defaults to /. For deployment under a subpath, use a leading and trailing slash, such as /docs/.",
+      "port controls the development server. The preview server uses port 4173.",
     ],
   },
   {
@@ -314,5 +356,6 @@ export const groups = [
   "Start",
   "Build interfaces",
   "Browser platform",
+  "Tooling",
   "Reference",
 ] as const;

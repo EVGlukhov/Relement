@@ -47,14 +47,27 @@ function Greeting({ name }: GreetingProps) {
 The JSX runtime is imported automatically; components do not need to import
 `h`.
 
-## Project status
+## Create a project
 
-The npm package is private and has not been published yet. To explore the
-current implementation locally:
+```sh
+npx @jgluhov/relement create my-app
+cd my-app
+npm install
+npm run dev
+```
+
+Build and preview a production version with:
+
+```sh
+npm run build
+npm run preview
+```
+
+## Contributing
 
 ```sh
 git clone https://github.com/EVGlukhov/Relement.git
 cd Relement
-npm install
+npm ci
 npm test
 ```
