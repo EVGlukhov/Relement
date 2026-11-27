@@ -1,16 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { h } from "../src/jsx.js";
-
-function TypedLabel({ text }: { text: string }) {
-  return <span>{text}</span>;
-}
-
-function TypedPanel({ children }: { children: string }) {
-  return <div>{children}</div>;
-}
+import { h } from "../src/jsx/jsx.js";
 
 test("type-checks props passed to function components with h", () => {
+  function TypedLabel({ text }: { text: string }) {
+    return <span>{text}</span>;
+  }
+
   h(TypedLabel, { text: "Hello" });
 
   // @ts-expect-error text must be a string
@@ -24,6 +20,14 @@ test("type-checks props passed to function components with h", () => {
 });
 
 test("type-checks function component props in JSX", () => {
+  function TypedLabel({ text }: { text: string }) {
+    return <span>{text}</span>;
+  }
+
+  function TypedPanel({ children }: { children: string }) {
+    return <div>{children}</div>;
+  }
+
   const label = <TypedLabel text="Hello" />;
   const keyedLabel = <TypedLabel key="label" text="Hello" />;
   const panel = <TypedPanel>Content</TypedPanel>;

@@ -1,7 +1,7 @@
 import { createVNode } from "./jsx.js";
-import type { VNode, VNodeChild, VNodeKey } from "./vdom.js";
+import type { VNode, VNodeChild, VNodeKey } from "../core/vdom.js";
 
-export { Fragment } from "./vdom.js";
+export { Fragment } from "../core/vdom.js";
 
 type RuntimeProps<P extends object> = P & {
   children?: VNodeChild;

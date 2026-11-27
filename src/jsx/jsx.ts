@@ -1,4 +1,4 @@
-import type { VNode, VNodeChild, VNodeKey } from "./vdom.js";
+import type { VNode, VNodeChild, VNodeKey } from "../core/vdom.js";
 
 type VNodeProps = Record<string, unknown> & {
   key?: VNodeKey;

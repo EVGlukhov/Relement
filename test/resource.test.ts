@@ -1,5 +1,5 @@
 import test from "node:test";
-import { createResource } from "../src/resource.js";
+import { createResource } from "../src/async/resource.js";
 import assert from "node:assert/strict";
 
 test("loads once and caches the resolved value", async () => {

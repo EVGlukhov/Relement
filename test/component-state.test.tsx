@@ -13,61 +13,6 @@ Object.assign(globalThis, {
 
 const { createRoot, useState } = await import("../src/index.js");
 
-function Counter() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <button onClick={() => setCount((value) => value + 1)}>{count}</button>
-  );
-}
-
-function TwoCountersApp() {
-  return (
-    <main>
-      <Counter />
-      <Counter />
-    </main>
-  );
-}
-
-let rerenderParent = (): void => {};
-
-function Parent() {
-  const [version, setVersion] = useState(0);
-  rerenderParent = () => setVersion((value) => value + 1);
-
-  return (
-    <main>
-      <p>Parent version: {version}</p>
-      <Counter />
-    </main>
-  );
-}
-
-function KeyedCounter({ id }: { id: string }) {
-  const [count, setCount] = useState(0);
-
-  return (
-    <button data-counter={id} onClick={() => setCount((value) => value + 1)}>
-      {id}: {count}
-    </button>
-  );
-}
-
-function KeyedCountersApp() {
-  const [reversed, setReversed] = useState(false);
-  const ids = reversed ? ["b", "a"] : ["a", "b"];
-
-  return (
-    <main>
-      <button onClick={() => setReversed((value) => !value)}>Reverse</button>
-      {ids.map((id) => (
-        <KeyedCounter key={id} id={id} />
-      ))}
-    </main>
-  );
-}
-
 function queryAllDeep<T extends Element>(
   root: ParentNode,
   selector: string,
@@ -91,6 +36,23 @@ function queryDeep<T extends Element>(
 }
 
 test("gives each function component its own state", () => {
+  function Counter() {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button onClick={() => setCount((value) => value + 1)}>{count}</button>
+    );
+  }
+
+  function TwoCountersApp() {
+    return (
+      <main>
+        <Counter />
+        <Counter />
+      </main>
+    );
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
 
@@ -112,6 +74,28 @@ test("gives each function component its own state", () => {
 });
 
 test("preserves child state when its parent rerenders", () => {
+  let rerenderParent = (): void => {};
+
+  function Counter() {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button onClick={() => setCount((value) => value + 1)}>{count}</button>
+    );
+  }
+
+  function Parent() {
+    const [version, setVersion] = useState(0);
+    rerenderParent = () => setVersion((value) => value + 1);
+
+    return (
+      <main>
+        <p>Parent version: {version}</p>
+        <Counter />
+      </main>
+    );
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<Parent />);
@@ -128,6 +112,30 @@ test("preserves child state when its parent rerenders", () => {
 });
 
 test("preserves keyed component state when siblings reorder", () => {
+  function KeyedCounter({ id }: { id: string }) {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button data-counter={id} onClick={() => setCount((value) => value + 1)}>
+        {id}: {count}
+      </button>
+    );
+  }
+
+  function KeyedCountersApp() {
+    const [reversed, setReversed] = useState(false);
+    const ids = reversed ? ["b", "a"] : ["a", "b"];
+
+    return (
+      <main>
+        <button onClick={() => setReversed((value) => !value)}>Reverse</button>
+        {ids.map((id) => (
+          <KeyedCounter key={id} id={id} />
+        ))}
+      </main>
+    );
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<KeyedCountersApp />);

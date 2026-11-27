@@ -59,7 +59,7 @@ for (const sourcePath of sourceFiles.filter((path) =>
 
   const runtimePath = relative(
     dirname(outputPath),
-    join(distRoot, "src/css-modules.js"),
+    join(distRoot, "src/styles/css-modules.js"),
   )
     .split(sep)
     .join("/");

@@ -14,22 +14,6 @@ Object.assign(globalThis, {
 const { createRoot, useState } = await import("../src/index.js");
 const { hotComponent } = await import("../src/hmr.js");
 
-function CounterV1() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <button onClick={() => setCount((value) => value + 1)}>v1: {count}</button>
-  );
-}
-
-function CounterV2() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <button onClick={() => setCount((value) => value + 1)}>v2: {count}</button>
-  );
-}
-
 function queryDeep<T extends Element>(
   root: ParentNode,
   selector: string,
@@ -50,6 +34,22 @@ function queryDeep<T extends Element>(
 }
 
 test("preserves state when a hot component implementation changes", () => {
+  function CounterV1() {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button onClick={() => setCount((value) => value + 1)}>v1: {count}</button>
+    );
+  }
+
+  function CounterV2() {
+    const [count, setCount] = useState(0);
+
+    return (
+      <button onClick={() => setCount((value) => value + 1)}>v2: {count}</button>
+    );
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
 

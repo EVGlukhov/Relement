@@ -1,4 +1,4 @@
-import type { FunctionComponent } from "./vdom.js";
+import type { FunctionComponent } from "./core/vdom.js";
 
 type HotRecord = {
   current: FunctionComponent;

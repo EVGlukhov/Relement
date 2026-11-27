@@ -11,7 +11,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@jgluhov/relement",
     "paths": {
-      "@jgluhov/relement/jsx-runtime": ["./src/jsx-runtime.js"]
+      "@jgluhov/relement/jsx-runtime": ["./src/jsx/jsx-runtime.js"]
     }
   },
   "include": [

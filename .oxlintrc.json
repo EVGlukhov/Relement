@@ -8,5 +8,13 @@
     "style": "off",
     "restriction": "off",
     "nursery": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.test.ts", "test/**/*.test.tsx"],
+      "rules": {
+        "unicorn/consistent-function-scoping": "off"
+      }
+    }
+  ]
 }

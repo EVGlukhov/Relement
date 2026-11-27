@@ -53,12 +53,12 @@
       "import": "./dist/src/index.js"
     },
     "./jsx-runtime": {
-      "types": "./dist/src/jsx-runtime.d.ts",
-      "import": "./dist/src/jsx-runtime.js"
+      "types": "./dist/src/jsx/jsx-runtime.d.ts",
+      "import": "./dist/src/jsx/jsx-runtime.js"
     },
     "./internal/css-modules": {
-      "types": "./dist/src/css-modules.d.ts",
-      "import": "./dist/src/css-modules.js"
+      "types": "./dist/src/styles/css-modules.d.ts",
+      "import": "./dist/src/styles/css-modules.js"
     }
   },
   "devDependencies": {

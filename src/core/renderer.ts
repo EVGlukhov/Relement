@@ -1,10 +1,10 @@
-import { HookRuntime } from "./hooks/runtime.js";
+import { HookRuntime } from "../hooks/runtime.js";
 import type { FunctionComponent, VNode, VNodeChild, VNodeKey } from "./vdom.js";
 import { Fragment } from "./vdom.js";
-import { getCSSForClassNames } from "./css-modules.js";
-import { getHotComponentId, subscribeToHotComponent } from "./hmr.js";
-import { getGlobalStyles } from "./global-styles.js";
-import { Suspense } from "./suspense.js";
+import { getCSSForClassNames } from "../styles/css-modules.js";
+import { getHotComponentId, subscribeToHotComponent } from "../hmr.js";
+import { getGlobalStyles } from "../styles/global-styles.js";
+import { Suspense } from "../async/suspense.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 

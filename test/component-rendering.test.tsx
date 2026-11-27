@@ -2,7 +2,10 @@ import { Window } from "happy-dom";
 import assert from "node:assert/strict";
 import test from "node:test";
 import moduleStyles from "./fixtures/component.module.css";
-import { createResource, type Resource } from "../src/resource.js";
+import {
+  createResource,
+  type Resource,
+} from "../src/async/resource.js";
 
 const dom = new Window();
 
@@ -15,36 +18,6 @@ Object.assign(globalThis, {
 
 const { createRoot, registerGlobalStyles, Suspense } =
   await import("../src/index.js");
-
-function PropsPanel({ title, children }: { title: string; children: string }) {
-  return (
-    <article>
-      <h1>{title}</h1>
-      <p>{children}</p>
-    </article>
-  );
-}
-
-function PropsApp() {
-  return <PropsPanel title="Welcome">Panel content</PropsPanel>;
-}
-
-function FragmentApp() {
-  return (
-    <>
-      <span>First</span>
-      <span>Second</span>
-    </>
-  );
-}
-
-function StyledDemo() {
-  return <div className={moduleStyles.box}>Styled</div>;
-}
-
-function ShadowApp() {
-  return <p>Inside</p>;
-}
 
 function queryAllDeep<T extends Element>(
   root: ParentNode,
@@ -68,23 +41,26 @@ function queryDeep<T extends Element>(
   return queryAllDeep<T>(root, selector)[0];
 }
 
-function GlobalStylesDemo() {
-  return <div className="global-style-test">Styled globally</div>;
-}
-
-function AsyncText({ resource }: { resource: Resource<string> }) {
-  return <p>{resource.read()}</p>;
-}
-
-function SuspenseDemo({ resource }: { resource: Resource<string> }) {
-  return (
-    <Suspense fallback={<p>Loading profile...</p>}>
-      <AsyncText resource={resource} />
-    </Suspense>
-  );
-}
-
 test("passes props and children to function components", () => {
+  function PropsPanel({
+    title,
+    children,
+  }: {
+    title: string;
+    children: string;
+  }) {
+    return (
+      <article>
+        <h1>{title}</h1>
+        <p>{children}</p>
+      </article>
+    );
+  }
+
+  function PropsApp() {
+    return <PropsPanel title="Welcome">Panel content</PropsPanel>;
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<PropsApp />);
@@ -100,6 +76,15 @@ test("passes props and children to function components", () => {
 });
 
 test("renders fragments without adding a wrapper", () => {
+  function FragmentApp() {
+    return (
+      <>
+        <span>First</span>
+        <span>Second</span>
+      </>
+    );
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<FragmentApp />);
@@ -133,6 +118,10 @@ test("applies className and object styles to HTML elements", () => {
 });
 
 test("renders function components inside an open shadow root", () => {
+  function ShadowApp() {
+    return <p>Inside</p>;
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<ShadowApp />);
@@ -145,6 +134,10 @@ test("renders function components inside an open shadow root", () => {
 });
 
 test("injects registered module styles into the component shadow root", () => {
+  function StyledDemo() {
+    return <div className={moduleStyles.box}>Styled</div>;
+  }
+
   const host = document.createElement("div");
   document.body.appendChild(host);
   createRoot(host).render(<StyledDemo />);
@@ -164,6 +157,10 @@ test("injects registered module styles into the component shadow root", () => {
 });
 
 test("injects registered global styles into the document and shadow root", () => {
+  function GlobalStylesDemo() {
+    return <div className="global-style-test">Styled globally</div>;
+  }
+
   const css = ".global-style-test { color: rebeccapurple; }";
   registerGlobalStyles("test/global.css", css);
 
@@ -186,6 +183,18 @@ test("injects registered global styles into the document and shadow root", () =>
 });
 
 test("shows fallback when a child suspends", async () => {
+  function AsyncText({ resource }: { resource: Resource<string> }) {
+    return <p>{resource.read()}</p>;
+  }
+
+  function SuspenseDemo({ resource }: { resource: Resource<string> }) {
+    return (
+      <Suspense fallback={<p>Loading profile...</p>}>
+        <AsyncText resource={resource} />
+      </Suspense>
+    );
+  }
+
   const resource = createResource(() => new Promise<string>(() => {}));
   const host = document.createElement("div");
   document.body.appendChild(host);

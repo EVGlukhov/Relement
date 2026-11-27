@@ -1,5 +1,5 @@
 import { HookRuntime } from "./hooks/runtime.js";
-import { reconcileChildren } from "./renderer.js";
+import { reconcileChildren } from "./core/renderer.js";
 import { ComponentProps, ComponentRender } from "./types.js";
 
 export function defineElement<TProps extends object>(
