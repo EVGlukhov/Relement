@@ -1,40 +1,70 @@
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { logInfo, logSuccess } from "../logger.mjs";
+import { logSuccess } from "../logger.mjs";
+import { loadConfig } from "../dev-server/load-config.mjs";
+import { runBuild } from "./build.mjs";
+import { runDev } from "./dev.mjs";
+import { createProject } from "./create.mjs";
+import { runPreview } from "./preview.mjs";
+import { printHelp } from "./help.mjs";
 
-const templateDirectory = fileURLToPath(
-  new URL("../../templates/relement/", import.meta.url),
-);
+/** @param {string} projectRoot */
+async function loadProjectConfig(projectRoot) {
+  return loadConfig(resolve(projectRoot, "relement.config.js"));
+}
 
-/** @param {string[]} args */
-export async function runCli(args) {
-  const [command, projectName] = args;
+async function loadCurrentProject() {
+  const projectRoot = process.cwd();
+  const config = await loadProjectConfig(projectRoot);
+  return { projectRoot, config };
+}
 
-  if (command === "--help" || command === "-h" || command === undefined) {
-    logInfo("Usage: relement create <project-name>");
-    return;
+/** @param {string[]} commandArgs */
+export async function runCli(commandArgs) {
+  const [command, ...args] = commandArgs;
+
+  switch (command) {
+    case undefined:
+    case "--help":
+    case "-h":
+      printHelp();
+      return;
+
+    case "create":
+      if (args.length !== 1) {
+        throw new Error("Usage: relement create <project-name>");
+      }
+      await createProject(args[0]);
+      return;
+
+    case "dev": {
+      if (args.length > 0) {
+        throw new Error("Usage: relement dev");
+      }
+      const { projectRoot, config } = await loadCurrentProject();
+      await runDev(projectRoot, config);
+      return;
+    }
+
+    case "build": {
+      if (args.length > 0) {
+        throw new Error("Usage: relement build");
+      }
+      const { projectRoot, config } = await loadCurrentProject();
+      await runBuild(projectRoot, config);
+      logSuccess("Production build complete in dist/.");
+      return;
+    }
+
+    case "preview": {
+      if (args.length > 0) {
+        throw new Error("Usage: relement preview");
+      }
+      const { projectRoot, config } = await loadCurrentProject();
+      await runPreview(projectRoot, config);
+      return;
+    }
+
+    default:
+      throw new Error(`Unknown command: ${command}`);
   }
-
-  if (command !== "create") {
-    throw new Error(`Unknown command: ${command}`);
-  }
-
-  if (!projectName || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectName)) {
-    throw new Error(
-      "Provide a project name using lowercase letters, numbers and hyphens.",
-    );
-  }
-
-  const destination = resolve(process.cwd(), projectName);
-  await mkdir(destination);
-  await cp(templateDirectory, destination, { recursive: true });
-
-  const packagePath = resolve(destination, "package.json");
-  const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
-  packageJson.name = projectName;
-
-  await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
-
-  logSuccess(`Created project "${projectName}".`);
 }

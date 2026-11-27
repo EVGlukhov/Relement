@@ -26,6 +26,15 @@ export function logError(message, detail) {
   }
 }
 
-export function logBanner() {
-  console.log(`\n${styleText("bold", "Relement")} ${styleText("dim", "dev")}`);
+/** @param {string} [label] */
+export function logBanner(label = "dev") {
+  console.log(`\n${styleText("bold", "Relement")} ${styleText("dim", label)}`);
+}
+
+/** @param {string} title @param {string[]} lines */
+export function logSection(title, lines) {
+  console.log(`\n${styleText("cyan", title)}`);
+  for (const line of lines) {
+    console.log(`  ${line}`);
+  }
 }

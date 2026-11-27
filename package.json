@@ -29,7 +29,8 @@
     "bin",
     "scripts/cli",
     "templates/relement",
-    "scripts/logger.mjs"
+    "scripts/logger.mjs",
+    "scripts/dev-server"
   ],
   "bin": {
     "relement": "./bin/relement.mjs"
@@ -44,6 +45,10 @@
     "./jsx-runtime": {
       "types": "./dist/src/jsx-runtime.d.ts",
       "import": "./dist/src/jsx-runtime.js"
+    },
+    "./internal/css-modules": {
+      "types": "./dist/src/css-modules.d.ts",
+      "import": "./dist/src/css-modules.js"
     }
   },
   "devDependencies": {
@@ -51,11 +56,11 @@
     "@types/node": "^26.6.6",
     "happy-dom": "^21.0.4",
     "oxlint": "^1.95.0",
-    "postcss": "^8.5.33",
-    "postcss-modules": "^9.1.4",
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "postcss": "^8.5.33",
+    "postcss-modules": "^9.1.4"
   }
 }

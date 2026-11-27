@@ -26,5 +26,6 @@
     "docs/app/**/*.tsx",
     "relement.config.ts",
     "scripts/dev-server/**/*.ts"
-  ]
+  ],
+  "exclude": ["dist", "node_modules"]
 }

@@ -25,6 +25,7 @@ function isMissingFile(error) {
  * @param {string} outputRoot
  * @param {string} clientScriptPath
  * @param {Set<import("node:http").ServerResponse>} clients
+ * @param {boolean} hmr
  * @returns {Promise<void>}
  */
 async function handleRequest(
@@ -34,6 +35,7 @@ async function handleRequest(
   outputRoot,
   clientScriptPath,
   clients,
+  hmr,
 ) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     response.writeHead(405, { Allow: "GET, HEAD" }).end("Method not allowed");
@@ -100,7 +102,7 @@ async function handleRequest(
     throw error;
   }
 
-  if (pathname === "/") {
+  if (pathname === "/" && hmr) {
     const html = content.toString("utf8");
     const hmrScript =
       '<script type="module" src="/__relement/client.js"></script>';
@@ -131,8 +133,9 @@ async function handleRequest(
 /**
  * @param {string} projectRoot
  * @param {import("./config.js").RelementConfig} config
+ * @param {{ hmr?: boolean }} [options]
  */
-export function createHttpServer(projectRoot, config) {
+export function createHttpServer(projectRoot, config, { hmr = true } = {}) {
   const htmlPath = resolve(projectRoot, config.root, config.html);
   const outputRoot = resolve(projectRoot, "dist");
 
@@ -147,6 +150,7 @@ export function createHttpServer(projectRoot, config) {
       outputRoot,
       hmrClientPath,
       clients,
+      hmr,
     ).catch((error) => {
       logError("HTTP request failed", error);
 
@@ -167,5 +171,11 @@ export function createHttpServer(projectRoot, config) {
     }
   }
 
-  return { server, notifyUpdate };
+  function notifyReload() {
+    for (const client of clients) {
+      client.write("event: reload\ndata: reload\n\n");
+    }
+  }
+
+  return { server, notifyUpdate, notifyReload };
 }

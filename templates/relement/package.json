@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "relement",
+    "dev": "relement dev",
     "build": "relement build",
     "preview": "relement preview"
   },

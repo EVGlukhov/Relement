@@ -12,5 +12,6 @@
   "files.watcherExclude": {
     "**/.history/**": true
   },
-  "typescript.preferences.autoImportFileExcludePatterns": ["**/.history/**"]
+  "typescript.preferences.autoImportFileExcludePatterns": ["**/.history/**"],
+  "javascript.implicitProjectConfig.checkJs": false
 }
