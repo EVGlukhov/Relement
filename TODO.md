@@ -31,3 +31,14 @@
     matching IDs exist in more than one shadow tree.
   - Add tests for nested shadow targets, native-link fallbacks, and history
     navigation. Document that closed, unmanaged Shadow Roots are out of scope.
+
+- [ ] **Prototype compiler-generated direct DOM updates**
+  - Keep the existing JSX and hooks API while compiling supported static JSX
+    structures into reusable DOM templates and direct bindings for dynamic text,
+    attributes, properties, and event handlers.
+  - Start with static elements and primitive dynamic values; leave dynamic
+    children and lists on the existing renderer initially.
+  - Add behavior-equivalence tests and benchmarks for mount and repeated
+    updates. Adopt the compiled path only if it shows a meaningful improvement,
+    and retain the existing renderer for unsupported patterns.
+  - Start with generated JavaScript; WebAssembly is not part of this prototype.

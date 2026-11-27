@@ -1,7 +1,7 @@
 export { useEffect } from "./use-effect.js";
 export { useState } from "./use-state.js";
 export { useRef } from "./use-ref.js";
-
+export { use } from "./use.js";
 export type {
   RefObject,
   RefSlot,

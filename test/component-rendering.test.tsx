@@ -2,10 +2,7 @@ import { Window } from "happy-dom";
 import assert from "node:assert/strict";
 import test from "node:test";
 import moduleStyles from "./fixtures/component.module.css";
-import {
-  createResource,
-  type Resource,
-} from "../src/async/resource.js";
+import { ErrorBoundary, use } from "../src/index.js";
 
 const dom = new Window();
 
@@ -183,28 +180,145 @@ test("injects registered global styles into the document and shadow root", () =>
 });
 
 test("shows fallback when a child suspends", async () => {
-  function AsyncText({ resource }: { resource: Resource<string> }) {
-    return <p>{resource.read()}</p>;
+  function AsyncText({ promise }: { promise: PromiseLike<string> }) {
+    return <p>{use(promise)}</p>;
   }
 
-  function SuspenseDemo({ resource }: { resource: Resource<string> }) {
+  function SuspenseDemo({ promise }: { promise: PromiseLike<string> }) {
     return (
       <Suspense fallback={<p>Loading profile...</p>}>
-        <AsyncText resource={resource} />
+        <AsyncText promise={promise} />
       </Suspense>
     );
   }
 
-  const resource = createResource(() => new Promise<string>(() => {}));
+  let resolveProfile: ((value: string) => void) | undefined;
+  const profilePromise = new Promise<string>((resolve) => {
+    resolveProfile = resolve;
+  });
   const host = document.createElement("div");
   document.body.appendChild(host);
 
-  createRoot(host).render(<SuspenseDemo resource={resource} />);
+  createRoot(host).render(<SuspenseDemo promise={profilePromise} />);
+
+  await new Promise<void>((resolve) => queueMicrotask(resolve));
+  assert.equal(
+    queryDeep<HTMLParagraphElement>(host, "p")?.textContent,
+    "Loading profile...",
+  );
+
+  assert.ok(resolveProfile);
+  resolveProfile("Profile loaded");
+  await profilePromise;
+
+  assert.equal(
+    queryDeep<HTMLParagraphElement>(host, "p")?.textContent,
+    "Profile loaded",
+  );
+});
+
+test("shows an error fallback when a nested child throws during render", async () => {
+  function BrokenPanel(): never {
+    throw new Error("render failed");
+  }
+
+  function ErrorBoundaryDemo() {
+    return (
+      <ErrorBoundary
+        fallback={(error) => (
+          <p role="alert">
+            {error instanceof Error ? error.message : "Unknown error"}
+          </p>
+        )}
+      >
+        <section>
+          <BrokenPanel />
+        </section>
+      </ErrorBoundary>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<ErrorBoundaryDemo />);
 
   await new Promise<void>((resolve) => queueMicrotask(resolve));
 
   assert.equal(
-    queryDeep<HTMLParagraphElement>(host, "p")?.textContent,
-    "Loading profile...",
+    queryDeep<HTMLParagraphElement>(host, '[role="alert"]')?.textContent,
+    "render failed",
+  );
+});
+
+test("catches a rejected promise inside Suspense", async () => {
+  const failure = new Error("profile load failed");
+  const profilePromise = Promise.reject<string>(failure);
+
+  function AsyncText() {
+    return <p>{use(profilePromise)}</p>;
+  }
+
+  function ErrorBoundaryDemo() {
+    return (
+      <ErrorBoundary
+        fallback={(error) => (
+          <p role="alert">
+            {error instanceof Error ? error.message : "Unknown error"}
+          </p>
+        )}
+      >
+        <Suspense fallback={<p>Loading profile...</p>}>
+          <AsyncText />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<ErrorBoundaryDemo />);
+
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(
+    queryDeep<HTMLParagraphElement>(host, '[role="alert"]')?.textContent,
+    "profile load failed",
+  );
+});
+
+test("passes errors from an error fallback to its parent boundary", async () => {
+  function BrokenPanel(): never {
+    throw new Error("render failed");
+  }
+
+  function BrokenFallback(): never {
+    throw new Error("fallback failed");
+  }
+
+  function ErrorBoundaryDemo() {
+    return (
+      <ErrorBoundary
+        fallback={(error) => (
+          <p role="alert">
+            {error instanceof Error ? error.message : "Unknown error"}
+          </p>
+        )}
+      >
+        <ErrorBoundary fallback={() => <BrokenFallback />}>
+          <BrokenPanel />
+        </ErrorBoundary>
+      </ErrorBoundary>
+    );
+  }
+
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  createRoot(host).render(<ErrorBoundaryDemo />);
+
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(
+    queryDeep<HTMLParagraphElement>(host, '[role="alert"]')?.textContent,
+    "fallback failed",
   );
 });

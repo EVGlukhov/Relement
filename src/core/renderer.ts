@@ -5,6 +5,10 @@ import { getCSSForClassNames } from "../styles/css-modules.js";
 import { getHotComponentId, subscribeToHotComponent } from "../hmr.js";
 import { getGlobalStyles } from "../styles/global-styles.js";
 import { Suspense } from "../async/suspense.js";
+import {
+  ErrorBoundary,
+  type ErrorBoundaryProps,
+} from "./error-boundary.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
 
@@ -53,8 +57,13 @@ interface FunctionComponentHost extends HTMLElement {
     component: FunctionComponent,
     renderComponent: () => VNodeChild,
     suspenseBoundary?: SuspenseBoundary,
+    errorBoundary?: ErrorBoundaryContext,
     props?: Readonly<Record<string, unknown>>,
   ): void;
+}
+
+interface ErrorBoundaryContext {
+  capture(error: unknown): void;
 }
 
 function isFragment(child: VNodeChild): child is VNode {
@@ -73,6 +82,12 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
     "then" in value &&
     typeof value.then === "function"
   );
+}
+
+function isErrorFallback(
+  value: unknown,
+): value is ErrorBoundaryProps["fallback"] {
+  return typeof value === "function";
 }
 
 function isFunctionComponentHost(
@@ -257,6 +272,7 @@ function reconcileChild(
   current: ChildNode | undefined,
   child: VNodeChild,
   suspenseBoundary?: SuspenseBoundary,
+  errorBoundary?: ErrorBoundaryContext,
 ): Node {
   if (typeof child === "string" || typeof child === "number") {
     const text = String(child);
@@ -294,6 +310,7 @@ function reconcileChild(
           vnode.type,
           renderComponent,
           suspenseBoundary,
+          errorBoundary,
           vnode.props,
         );
         return current;
@@ -305,6 +322,7 @@ function reconcileChild(
       vnode.type,
       renderComponent,
       suspenseBoundary,
+      errorBoundary,
       vnode.props,
     );
     return host;
@@ -317,7 +335,13 @@ function reconcileChild(
       : document.createElement(vnode.type);
 
   updateElementProps(element, vnode.props);
-  reconcileChildren(element, vnode.children);
+  reconcileChildren(
+    element,
+    vnode.children,
+    undefined,
+    suspenseBoundary,
+    errorBoundary,
+  );
 
   return element;
 }
@@ -327,6 +351,7 @@ export function reconcileChildren(
   children: readonly VNodeChild[],
   styleElement?: HTMLStyleElement,
   suspenseBoundary?: SuspenseBoundary,
+  errorBoundary?: ErrorBoundaryContext,
 ): void {
   const nextChildren = flattenChildren(children);
 
@@ -373,7 +398,12 @@ export function reconcileChildren(
             (node) => !usedNodes.has(node) && nodeKeys.get(node) === key,
           );
 
-    const next = reconcileChild(current, child, suspenseBoundary);
+    const next = reconcileChild(
+      current,
+      child,
+      suspenseBoundary,
+      errorBoundary,
+    );
 
     if (previousNodes.has(next)) {
       usedNodes.add(next);
@@ -419,8 +449,12 @@ function ensureComponentHost(component: FunctionComponent): string {
     #unsubscribeHotUpdate: (() => void) | undefined;
     #parentSuspenseBoundary: SuspenseBoundary | undefined;
     #suspenseBoundary: SuspenseBoundary | undefined;
+    #parentErrorBoundary: ErrorBoundaryContext | undefined;
+    #errorBoundary: ErrorBoundaryContext | undefined;
     #pendingPromises = new Set<PromiseLike<unknown>>();
     #showFallback = false;
+    #capturedError: unknown;
+    #hasCapturedError = false;
     #props: Readonly<Record<string, unknown>> = {};
 
     constructor() {
@@ -461,6 +495,7 @@ function ensureComponentHost(component: FunctionComponent): string {
       nextComponent: FunctionComponent,
       renderComponent: () => VNodeChild,
       suspenseBoundary?: SuspenseBoundary,
+      errorBoundary?: ErrorBoundaryContext,
       props?: Readonly<Record<string, unknown>>,
     ): void {
       this.#component = nextComponent;
@@ -470,6 +505,11 @@ function ensureComponentHost(component: FunctionComponent): string {
         nextComponent === Suspense
           ? { suspend: (promise) => this.suspend(promise) }
           : suspenseBoundary;
+      this.#parentErrorBoundary = errorBoundary;
+      this.#errorBoundary =
+        nextComponent === ErrorBoundary
+          ? { capture: (error) => this.capture(error) }
+          : errorBoundary;
       this.#props = props ?? {};
 
       if (this.isConnected) {
@@ -502,6 +542,17 @@ function ensureComponentHost(component: FunctionComponent): string {
       if (this.isConnected) this.update();
     }
 
+    private capture(error: unknown): void {
+      if (this.#hasCapturedError) return;
+
+      this.#capturedError = error;
+      this.#hasCapturedError = true;
+
+      queueMicrotask(() => {
+        if (this.isConnected) this.update();
+      });
+    }
+
     private update(): void {
       const currentComponent = this.#component;
 
@@ -515,36 +566,63 @@ function ensureComponentHost(component: FunctionComponent): string {
         throw new Error("Function component host has no render function.");
       }
 
-      const isBoundary = currentComponent === Suspense;
-      let view: VNodeChild;
+      const isSuspenseBoundary = currentComponent === Suspense;
+      const isErrorBoundary = currentComponent === ErrorBoundary;
+      const showingErrorFallback = isErrorBoundary && this.#hasCapturedError;
+      const errorBoundaryForView = showingErrorFallback
+        ? this.#parentErrorBoundary
+        : this.#errorBoundary;
 
-      if (isBoundary && this.#showFallback) {
-        view = this.#props.fallback as VNodeChild;
-      } else {
-        try {
+      const childSuspenseBoundary =
+        isSuspenseBoundary && this.#showFallback
+          ? this.#parentSuspenseBoundary
+          : this.#suspenseBoundary;
+      const childErrorBoundary = showingErrorFallback
+        ? this.#parentErrorBoundary
+        : this.#errorBoundary;
+
+      try {
+        let view: VNodeChild;
+
+        if (showingErrorFallback) {
+          const fallback = this.#props.fallback;
+
+          if (!isErrorFallback(fallback)) {
+            throw new TypeError("ErrorBoundary requires a fallback function.");
+          }
+
+          view = fallback(this.#capturedError);
+        } else if (isSuspenseBoundary && this.#showFallback) {
+          view = this.#props.fallback as VNodeChild;
+        } else {
           view = this.#hooks.render(renderComponent);
-        } catch (error) {
-          if (isPromiseLike(error) && this.#parentSuspenseBoundary) {
+        }
+
+        reconcileChildren(
+          this.#shadowRoot,
+          [view],
+          this.#styleElement,
+          childSuspenseBoundary,
+          childErrorBoundary,
+        );
+        this.#hooks.commitEffects();
+      } catch (error) {
+        if (isPromiseLike(error)) {
+          if (this.#parentSuspenseBoundary) {
             this.#parentSuspenseBoundary.suspend(error);
             return;
           }
 
           throw error;
         }
+
+        if (errorBoundaryForView) {
+          errorBoundaryForView.capture(error);
+          return;
+        }
+
+        throw error;
       }
-
-      const childBoundary =
-        isBoundary && this.#showFallback
-          ? this.#parentSuspenseBoundary
-          : this.#suspenseBoundary;
-
-      reconcileChildren(
-        this.#shadowRoot,
-        [view],
-        this.#styleElement,
-        childBoundary,
-      );
-      this.#hooks.commitEffects();
     }
   }
 
