@@ -3,6 +3,7 @@ import { dirname, relative, resolve, sep } from "node:path";
 import { build, transform } from "esbuild";
 import postcss from "postcss";
 import postcssModules from "postcss-modules";
+import { loadClientEnv } from "./env.mjs";
 
 /** @param {{ minify: boolean }} options */
 function cssModulesPlugin({ minify }) {
@@ -58,6 +59,12 @@ export async function runBuild(
   const outputRoot = resolve(projectRoot, "dist");
   const assetsRoot = resolve(outputRoot, "assets");
 
+  const importMetaEnv = await loadClientEnv(
+    projectRoot,
+    mode,
+    config.base ?? "/",
+  );
+
   const result = await build({
     absWorkingDir: projectRoot,
     entryPoints: [entryPath],
@@ -73,7 +80,10 @@ export async function runBuild(
     metafile: true,
     minify: production,
     treeShaking: true,
-    define: { "process.env.NODE_ENV": JSON.stringify(mode) },
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(mode),
+      "import.meta.env": JSON.stringify(importMetaEnv),
+    },
     plugins: [cssModulesPlugin({ minify: production })],
   });
 

@@ -69,6 +69,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "dotenv": "^18.0.10",
     "esbuild": "^0.28.2",
     "postcss": "^8.5.33",
     "postcss-modules": "^9.1.4"

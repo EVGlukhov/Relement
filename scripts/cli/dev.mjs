@@ -9,7 +9,7 @@ import { runBuild } from "./build.mjs";
  * @param {import("../dev-server/config.js").RelementConfig} config
  */
 export async function runDev(projectRoot, config) {
-  await runBuild(projectRoot, config);
+  await runBuild(projectRoot, config, { mode: "development" });
 
   const serverConfig = {
     ...config,
@@ -41,7 +41,7 @@ export async function runDev(projectRoot, config) {
 
     clearTimeout(timer);
     timer = setTimeout(() => {
-      void runBuild(projectRoot, config)
+      void runBuild(projectRoot, config, { mode: "development" })
         .then(() => {
           notifyReload();
           logSuccess(`Rebuilt after change: ${changedPath}`);
