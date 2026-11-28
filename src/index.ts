@@ -18,3 +18,4 @@ export {
   ErrorBoundary,
   type ErrorBoundaryProps,
 } from "./core/error-boundary.js";
+export { Portal, type PortalProps, type PortalTarget } from "./core/portal.js";

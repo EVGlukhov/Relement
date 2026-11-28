@@ -13,7 +13,7 @@ Object.assign(globalThis, {
   customElements: dom.customElements,
 });
 
-const { createRoot, registerGlobalStyles, Suspense } =
+const { createRoot, registerGlobalStyles, Suspense, Portal } =
   await import("../src/index.js");
 
 function queryAllDeep<T extends Element>(
@@ -321,4 +321,65 @@ test("passes errors from an error fallback to its parent boundary", async () => 
     queryDeep<HTMLParagraphElement>(host, '[role="alert"]')?.textContent,
     "fallback failed",
   );
+});
+
+test("renders portal content in its target and cleans it up on unmount", () => {
+  const host = document.createElement("div");
+  const target = document.createElement("div");
+
+  document.body.append(host, target);
+
+  function PortalApp() {
+    return (
+      <Portal target={target}>
+        <p>Rendered elsewhere</p>
+      </Portal>
+    );
+  }
+
+  const root = createRoot(host);
+  root.render(<PortalApp />);
+
+  assert.equal(target.querySelector("p")?.textContent, "Rendered elsewhere");
+  assert.equal(host.querySelector("p"), null);
+
+  root.render(null);
+
+  assert.equal(target.querySelector("p"), null);
+  assert.equal(target.querySelector("[data-relement-portal]"), null);
+
+  host.remove();
+  target.remove();
+});
+
+test("preserves a portal when its target is the root host", () => {
+  const host = document.createElement("div");
+  document.body.append(host);
+
+  const root = createRoot(host);
+
+  root.render(
+    <Portal target={host}>
+      <p>Portal content</p>
+    </Portal>,
+  );
+
+  assert.equal(host.querySelector("p")?.textContent, "Portal content");
+  assert.equal(host.querySelectorAll("[data-relement-portal]").length, 1);
+
+  root.render(
+    <Portal target={host}>
+      <p>Portal content updated</p>
+    </Portal>,
+  );
+
+  assert.equal(host.querySelector("p")?.textContent, "Portal content updated");
+  assert.equal(host.querySelectorAll("[data-relement-portal]").length, 1);
+
+  root.render(null);
+
+  assert.equal(host.querySelector("p"), null);
+  assert.equal(host.querySelector("[data-relement-portal]"), null);
+
+  host.remove();
 });

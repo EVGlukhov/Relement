@@ -5,12 +5,18 @@ import { getCSSForClassNames } from "../styles/css-modules.js";
 import { getHotComponentId, subscribeToHotComponent } from "../hmr.js";
 import { getGlobalStyles } from "../styles/global-styles.js";
 import { Suspense } from "../async/suspense.js";
-import {
-  ErrorBoundary,
-  type ErrorBoundaryProps,
-} from "./error-boundary.js";
+import { ErrorBoundary, type ErrorBoundaryProps } from "./error-boundary.js";
+import { Portal, type PortalTarget } from "./portal.js";
 
 const nodeKeys = new WeakMap<Node, VNodeKey>();
+
+interface PortalState {
+  target: PortalTarget;
+  container: HTMLElement;
+}
+
+const portalStates = new WeakMap<Comment, PortalState>();
+const portalContainers = new WeakSet<HTMLElement>();
 
 const componentHostTags = new Set<string>();
 
@@ -98,6 +104,37 @@ function isFunctionComponentHost(
 
 function isStyleObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPortalTarget(value: unknown): value is PortalTarget {
+  return (
+    value instanceof HTMLElement ||
+    (value instanceof Node &&
+      value.nodeType === Node.DOCUMENT_FRAGMENT_NODE &&
+      "host" in value)
+  );
+}
+
+function disposePortals(node: Node): void {
+  if (node.nodeType === Node.COMMENT_NODE) {
+    const anchor = node as Comment;
+    const state = portalStates.get(anchor);
+
+    if (state) {
+      disposePortals(state.container);
+      state.container.remove();
+      portalContainers.delete(state.container);
+      portalStates.delete(anchor);
+    }
+  }
+
+  if (node instanceof HTMLElement && node.shadowRoot) {
+    disposePortals(node.shadowRoot);
+  }
+
+  for (const child of Array.from(node.childNodes)) {
+    disposePortals(child);
+  }
 }
 
 function toCssPropertyName(name: string): string {
@@ -268,6 +305,59 @@ function updateElementProps(
   elementProps.set(element, props);
 }
 
+function reconcilePortal(
+  current: ChildNode | undefined,
+  vnode: VNode,
+  suspenseBoundary?: SuspenseBoundary,
+  errorBoundary?: ErrorBoundaryContext,
+): Comment {
+  const target = vnode.props.target;
+
+  if (!isPortalTarget(target)) {
+    throw new TypeError("Portal requires an HTMLElement or ShadowRoot target.");
+  }
+
+  const currentAnchor =
+    current?.nodeType === Node.COMMENT_NODE ? (current as Comment) : undefined;
+  const existingState = currentAnchor
+    ? portalStates.get(currentAnchor)
+    : undefined;
+
+  let anchor: Comment;
+  let state: PortalState;
+
+  if (currentAnchor && existingState) {
+    anchor = currentAnchor;
+    state = existingState;
+  } else {
+    anchor = document.createComment("relement-portal");
+
+    const container = document.createElement("div");
+    portalContainers.add(container);
+    container.setAttribute("data-relement-portal", "");
+    container.style.display = "contents";
+
+    state = { target, container };
+    portalStates.set(anchor, state);
+    target.appendChild(container);
+  }
+
+  if (state.target !== target) {
+    target.appendChild(state.container);
+    state.target = target;
+  }
+
+  reconcileChildren(
+    state.container,
+    vnode.children,
+    undefined,
+    suspenseBoundary,
+    errorBoundary,
+  );
+
+  return anchor;
+}
+
 function reconcileChild(
   current: ChildNode | undefined,
   child: VNodeChild,
@@ -293,6 +383,10 @@ function reconcileChild(
 
   if (vnode.type === Fragment) {
     throw new Error("Fragment nodes must be flattened before reconciliation.");
+  }
+
+  if (vnode.type === Portal) {
+    return reconcilePortal(current, vnode, suspenseBoundary, errorBoundary);
   }
 
   if (typeof vnode.type !== "string") {
@@ -423,7 +517,12 @@ export function reconcileChildren(
   }
 
   for (const node of previous) {
-    if (!usedNodes.has(node) && node.parentNode === parent) {
+    if (
+      !usedNodes.has(node) &&
+      node.parentNode === parent &&
+      !(node instanceof HTMLElement && portalContainers.has(node))
+    ) {
+      disposePortals(node);
       parent.removeChild(node);
     }
   }
